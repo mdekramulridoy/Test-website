@@ -177,7 +177,6 @@
                                 <h4 class="text-lg font-bold text-gray-800 mb-1">SEO ডিসক্রিপশন ড্রাফট (Description)</h4>
                                 <p class="text-gray-700 whitespace-pre-line">${description}</p>
                             </div>
-                            <p class="text-sm text-gray-500 mt-2">আমরা কোর্সে এই ধরণের AI টুলের সঠিক ব্যবহার শেখাই, যা আপনার সময় বাঁচাবে!</p>
                         </div>
                     `;
                 } else {
@@ -185,6 +184,87 @@
                 }
             } catch (error) {
                 console.error("Gemini API Error:", error);
+                outputDiv.innerHTML = '<p class="text-red-500 font-semibold">API যোগাযোগে ব্যর্থতা। আপনার ইন্টারনেট সংযোগ যাচাই করুন বা পরে আবার চেষ্টা করুন।</p>';
+            } finally {
+                loader.classList.add('hidden');
+                generateButton.disabled = false;
+            }
+        }
+        
+        async function generateContentIdeas() {
+            const topicInput = document.getElementById('nicheKeyword');
+            const outputDiv = document.getElementById('ideaOutput');
+            const loader = document.getElementById('ideaLoader');
+            const generateButton = document.getElementById('ideaButton');
+            const userTopic = topicInput.value.trim();
+
+            if (!userTopic) {
+                outputDiv.innerHTML = '<p class="text-red-500 font-semibold">অনুগ্রহ করে একটি Niche বা কী-ওয়ার্ড লিখুন।</p>';
+                return;
+            }
+
+            outputDiv.innerHTML = '';
+            loader.classList.remove('hidden');
+            generateButton.disabled = true;
+
+            const systemPrompt = `You are a professional YouTube content strategist. Based on the user's niche, generate 3 highly trending and unique video ideas suitable for the Bangladeshi audience. The output should be a JSON array of objects, where each object has keys 'id' (number), 'title' (Bengali video title), and 'hook' (Bengali 1-sentence hook/description).`;
+
+            const userQuery = `Niche/Keyword: ${userTopic}. Generate 3 trending video ideas for YouTube in Bengali.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "id": { "type": "NUMBER" },
+                                "title": { "type": "STRING" },
+                                "hook": { "type": "STRING" }
+                            },
+                            "propertyOrdering": ["id", "title", "hook"]
+                        }
+                    }
+                }
+            };
+
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            try {
+                const response = await fetchWithRetry(API_URL, options);
+                const result = await response.json();
+                
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (jsonText) {
+                    const parsedJson = JSON.parse(jsonText);
+                    let htmlContent = '<div class="space-y-3 mt-4">';
+                    
+                    if (Array.isArray(parsedJson)) {
+                        parsedJson.forEach(idea => {
+                            htmlContent += `
+                                <div class="bg-green-50 p-3 rounded-lg shadow-sm border border-green-400">
+                                    <h4 class="font-bold text-gray-800">${idea.id}. ${idea.title}</h4>
+                                    <p class="text-sm text-gray-600 italic">${idea.hook}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                    htmlContent += '</div>';
+
+                    outputDiv.innerHTML = htmlContent;
+                } else {
+                    outputDiv.innerHTML = '<p class="text-red-500 font-semibold">আইডিয়া তৈরি করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।</p>';
+                }
+            } catch (error) {
+                console.error("Gemini API Error (Idea):", error);
                 outputDiv.innerHTML = '<p class="text-red-500 font-semibold">API যোগাযোগে ব্যর্থতা। আপনার ইন্টারনেট সংযোগ যাচাই করুন বা পরে আবার চেষ্টা করুন।</p>';
             } finally {
                 loader.classList.add('hidden');
@@ -328,6 +408,7 @@
                 <div class="bg-purple-50/70 p-6 rounded-xl shadow-lg border border-purple-100">
                     <h3 class="text-xl font-bold mb-2 text-purple-600">১:১ মেন্টরশিপ</h3>
                     <p class="text-gray-700 text-sm">একজন সফল কন্টেন্ট ক্রিয়েটরের কাছ থেকে ব্যক্তিগত গাইডলাইন। প্রতিদিন ২ ঘণ্টা লাইভ সাপোর্ট সেশন (৪-৬ PM) এবং নিয়মিত ফলো-আপ।</p>
+                </p>
                 </div>
                 <!-- X Factor 3: Success Session -->
                 <div class="bg-red-50/70 p-6 rounded-xl shadow-lg border border-red-100">
@@ -485,33 +566,61 @@
         </div>
     </section>
 
-    <!-- Gemini AI Tool Section (Moved up for better visibility) -->
-    <section id="ai-tool" class="py-20 bg-gray-100">
-        <div class="container mx-auto px-4 max-w-4xl text-center">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">ভাইরাল টাইটেল জেনারেটর (EH Science Club AI)</h2>
-            <p class="text-lg text-gray-600 mb-8">কোর্সে এনরোল করার আগেই আমাদের AI প্রযুক্তির ক্ষমতা অনুভব করুন। আপনার ভিডিও টপিক লিখুন এবং ভাইরাল টাইটেল ও SEO ডিসক্রিপশন পান।</p>
+    <!-- Gemini AI Tool Section (Updated to include two tools) -->
+    <section id="ai-tools-mastery" class="py-20 bg-gray-100">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">AI টুলস মাস্টারী ✨ (EH Science Club এর AI)</h2>
+            <p class="text-lg text-gray-600 mb-8">কোর্সে এনরোল করার আগেই আমাদের AI প্রযুক্তির ক্ষমতা অনুভব করুন।</p>
             
-            <div class="bg-white p-8 rounded-xl shadow-xl">
-                <input type="text" id="videoTopic" placeholder="যেমন: নতুন ইউটিউব চ্যানেল কীভাবে গ্রো করব?" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
-                
-                <button id="generateButton" onclick="generateSeoContent()" class="w-full bg-pink-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-pink-700 transition duration-300 shadow-md transform hover:scale-[1.01]">
-                    কন্টেন্ট তৈরি করুন
-                </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Tool 1: Viral Title Generator -->
+                <div class="bg-white p-6 rounded-xl shadow-xl text-left">
+                    <h3 class="text-2xl font-bold text-indigo-600 mb-4 border-b pb-2">১. ভাইরাল টাইটেল জেনারেটর</h3>
+                    <label for="videoTopic" class="block text-gray-700 font-semibold mb-2">আপনার ভিডিও টপিক লিখুন:</label>
+                    <input type="text" id="videoTopic" placeholder="যেমন: নতুন ইউটিউব চ্যানেল কীভাবে গ্রো করব?" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
+                    
+                    <button id="generateButton" onclick="generateSeoContent()" class="w-full bg-pink-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-pink-700 transition duration-300 shadow-md transform hover:scale-[1.01]">
+                        কন্টেন্ট তৈরি করুন
+                    </button>
 
-                <!-- Loader -->
-                <div id="loader" class="hidden mt-6 text-indigo-600 font-semibold">
-                    <svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    AI কন্টেন্ট তৈরি হচ্ছে, অপেক্ষা করুন...
+                    <!-- Loader -->
+                    <div id="loader" class="hidden mt-6 text-indigo-600 font-semibold">
+                        <svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        AI কন্টেন্ট তৈরি হচ্ছে, অপেক্ষা করুন...
+                    </div>
+
+                    <!-- Output -->
+                    <div id="seoOutput" class="mt-6 text-center">
+                        <!-- AI generated content will appear here -->
+                    </div>
                 </div>
 
-                <!-- Output -->
-                <div id="seoOutput" class="mt-6 text-center">
-                    <!-- AI generated content will appear here -->
+                <!-- Tool 2: Niche Idea Brainstormer -->
+                <div class="bg-white p-6 rounded-xl shadow-xl text-left">
+                    <h3 class="text-2xl font-bold text-green-600 mb-4 border-b pb-2">২. ট্রেন্ডিং আইডিয়া ফাইন্ডার</h3>
+                    <label for="nicheKeyword" class="block text-gray-700 font-semibold mb-2">আপনার Niche/কী-ওয়ার্ড লিখুন:</label>
+                    <input type="text" id="nicheKeyword" placeholder="যেমন: স্বাস্থ্য টিপস বা গেমিং" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-800">
+                    
+                    <button id="ideaButton" onclick="generateContentIdeas()" class="w-full bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-green-700 transition duration-300 shadow-md transform hover:scale-[1.01]">
+                        আইডিয়া জেনারেট করুন
+                    </button>
+                    
+                    <div id="ideaLoader" class="hidden mt-6 text-green-600 font-semibold text-center">
+                        <svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        ট্রেন্ডিং আইডিয়া তৈরি হচ্ছে...
+                    </div>
+                    <div id="ideaOutput" class="mt-6">
+                        <!-- AI generated content ideas will appear here -->
+                    </div>
                 </div>
             </div>
+            <p class="text-xl font-bold text-gray-700 mt-10">আমরা কোর্সে এই ধরণের AI টুলের সঠিক ব্যবহার শেখাই, যা আপনার সময় বাঁচাবে!</p>
         </div>
     </section>
 
