@@ -58,6 +58,26 @@
             display: flex;
             align-items: center;
         }
+        /* Sticky Floating Button Style */
+        .floating-cta {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #ff6b81 0%, #eb3b5a 100%); /* Pink/Red Gradient */
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s;
+            cursor: pointer;
+            text-align: left;
+            opacity: 0.95;
+        }
+        .floating-cta:hover {
+            transform: scale(1.05);
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -172,6 +192,16 @@
             }
         }
     </script>
+
+    <!-- Floating Sticky CTA Button -->
+    <a href="#enroll" class="floating-cta hidden md:block">
+        <div class="text-lg font-bold mb-1 flex items-center">
+            <span class="mr-2 text-2xl">➡️</span> এনরোলমেন্ট শুরু: <span class="ml-1 font-extrabold text-[#7cf0ff]">২৫ অক্টোবর</span>
+        </div>
+        <div class="text-lg font-bold flex items-center">
+            <span class="mr-2 text-2xl">❌</span> এনরোলমেন্ট শেষ: <span class="ml-1 font-extrabold text-[#7cf0ff]">১৪ নভেম্বর</span>
+        </div>
+    </a>
 
 
     <!-- Header Section -->
@@ -458,7 +488,7 @@
     <!-- Gemini AI Tool Section (Moved up for better visibility) -->
     <section id="ai-tool" class="py-20 bg-gray-100">
         <div class="container mx-auto px-4 max-w-4xl text-center">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">ভাইরাল টাইটেল জেনারেটর ✨</h2>
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">ভাইরাল টাইটেল জেনারেটর (EH Science Club AI)</h2>
             <p class="text-lg text-gray-600 mb-8">কোর্সে এনরোল করার আগেই আমাদের AI প্রযুক্তির ক্ষমতা অনুভব করুন। আপনার ভিডিও টপিক লিখুন এবং ভাইরাল টাইটেল ও SEO ডিসক্রিপশন পান।</p>
             
             <div class="bg-white p-8 rounded-xl shadow-xl">
