@@ -3,849 +3,590 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Mastery: আপনার সফলতার প্রমাণিত পথ</title>
-    <!-- Tailwind CSS লোড করা হচ্ছে -->
+    <title>ইউটিউব মাস্টারী কোর্স রুটিন (ব্যাচ ০২)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Serif+Bengali:wght@100..900&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
-            overflow-x: hidden;
+            font-family: 'Noto Serif Bengali', 'Inter', sans-serif;
+            background-color: #f8f9fa;
         }
-        .gradient-bg {
-            background: linear-gradient(135deg, #1f1d36 0%, #0d0a1b 100%);
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
         }
-        .text-gradient {
-            background: linear-gradient(90deg, #b2f8ff, #7cf0ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .active .accordion-content {
+            max-height: 2000px; /* Sufficiently large value */
         }
-        .text-gradient-dark {
-            background: linear-gradient(90deg, #b2f8ff, #7cf0ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .task-list {
+            list-style: none;
+            padding-left: 0;
         }
-        .card-bg-light {
-            background-color: #ffffff;
+        .task-list li::before {
+            content: "✅";
+            margin-right: 8px;
+            color: #10b981; /* Tailwind emerald-500 */
         }
-        .course-card {
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-        /* Custom Dark Purple for Card Background */
-        .card-bg {
-            background-color: #27004f;
-        }
-        .btn-primary {
-            background-color: #f0f0ff;
-            color: #0d0a1b;
-            transition: background-color 0.3s;
-        }
-        .btn-primary:hover {
-            background-color: #e0e0f0;
-        }
-        .shadow-glow {
-            box-shadow: 0 0 20px rgba(124, 240, 255, 0.5);
-        }
-        /* Style for the new logo - making it appear clean */
-        .logo-container {
-            width: 150px; /* Fixed width for logo area */
-            height: 40px; /* Fixed height for logo area */
-            display: flex;
-            align-items: center;
-        }
-        /* Sticky Floating Button Style */
-        .floating-cta {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: linear-gradient(135deg, #ff6b81 0%, #eb3b5a 100%); /* Pink/Red Gradient */
-            color: white;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-            transition: transform 0.3s;
-            cursor: pointer;
-            text-align: left;
-            opacity: 0.95;
-        }
-        .floating-cta:hover {
-            transform: scale(1.05);
-            opacity: 1;
+        /* Custom scrollbar for module tables */
+        .module-table-container {
+            overflow-x: auto;
+            max-width: 100%;
         }
     </style>
 </head>
-<body>
-    <script>
-        const API_KEY = "AIzaSyDjrcS4kdjktNGA2fCAkn1OwtZ87cShHYs"; // Gemini API Key. Leave as is.
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+<body class="p-4 sm:p-8">
 
-        // Utility function for exponential backoff retry logic
-        async function fetchWithRetry(url, options, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (!response.ok) {
-                        // Log error but don't stop the loop unless it's a non-retriable error (e.g., 4xx client errors other than 429)
-                        if (response.status === 429 || response.status >= 500) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        } else {
-                            // Non-retriable error, break the loop and process the error.
-                            return response;
-                        }
-                    }
-                    return response;
-                } catch (error) {
-                    if (i < retries - 1) {
-                        const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s delay
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    } else {
-                        throw error;
-                    }
-                }
-            }
-        }
-
-        async function generateSeoContent() {
-            const topicInput = document.getElementById('videoTopic');
-            const outputDiv = document.getElementById('seoOutput');
-            const loader = document.getElementById('loader');
-            const generateButton = document.getElementById('generateButton');
-            const userTopic = topicInput.value.trim();
-
-            if (!userTopic) {
-                outputDiv.innerHTML = '<p class="text-red-500 font-semibold">অনুগ্রহ করে একটি ভিডিও টপিক লিখুন।</p>';
-                return;
-            }
-
-            outputDiv.innerHTML = '';
-            loader.classList.remove('hidden');
-            generateButton.disabled = true;
-
-            const systemPrompt = `Act as an expert YouTube SEO specialist for content creators in Bangladesh. Your task is to take a simple video topic and generate: 1. One highly viral, clickbait yet professional Bengali title (under 60 characters). 2. A 3-point SEO-optimized Bengali description draft focusing on viewer benefits, problem-solving, and using keywords. Format the response strictly as a JSON object with 'title' and 'description' keys.`;
-
-            const userQuery = `Video Topic: ${userTopic}. Generate SEO title and description in Bengali.`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "title": { "type": "STRING", "description": "Highly viral, clickbait yet professional Bengali video title." },
-                            "description": { 
-                                "type": "STRING", 
-                                "description": "A 3-point SEO-optimized Bengali description draft focusing on viewer benefits, problem-solving, and using keywords, formatted with line breaks."
-                            }
-                        },
-                        "propertyOrdering": ["title", "description"]
-                    }
-                }
-            };
-
-            const options = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            };
-
-            try {
-                const response = await fetchWithRetry(API_URL, options);
-                const result = await response.json();
-                
-                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                
-                if (jsonText) {
-                    const parsedJson = JSON.parse(jsonText);
-                    const title = parsedJson.title || "টাইটেল তৈরি করা যায়নি।";
-                    const description = parsedJson.description || "ডিসক্রিপশন তৈরি করা যায়নি।";
-                    
-                    outputDiv.innerHTML = `
-                        <div class="space-y-4 text-left">
-                            <div class="bg-gray-100 p-4 rounded-lg shadow-md border-l-4 border-indigo-500">
-                                <h4 class="text-lg font-bold text-gray-800 mb-1">ভাইরাল টাইটেল (Title) ✨</h4>
-                                <p class="text-indigo-600 font-mono break-words">${title}</p>
-                            </div>
-                            <div class="bg-gray-100 p-4 rounded-lg shadow-md border-l-4 border-green-500">
-                                <h4 class="text-lg font-bold text-gray-800 mb-1">SEO ডিসক্রিপশন ড্রাফট (Description)</h4>
-                                <p class="text-gray-700 whitespace-pre-line">${description}</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    outputDiv.innerHTML = '<p class="text-red-500 font-semibold">কন্টেন্ট তৈরি করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।</p>';
-                }
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                outputDiv.innerHTML = '<p class="text-red-500 font-semibold">API যোগাযোগে ব্যর্থতা। আপনার ইন্টারনেট সংযোগ যাচাই করুন বা পরে আবার চেষ্টা করুন।</p>';
-            } finally {
-                loader.classList.add('hidden');
-                generateButton.disabled = false;
-            }
-        }
-        
-        async function generateContentIdeas() {
-            const topicInput = document.getElementById('nicheKeyword');
-            const outputDiv = document.getElementById('ideaOutput');
-            const loader = document.getElementById('ideaLoader');
-            const generateButton = document.getElementById('ideaButton');
-            const userTopic = topicInput.value.trim();
-
-            if (!userTopic) {
-                outputDiv.innerHTML = '<p class="text-red-500 font-semibold">অনুগ্রহ করে একটি Niche বা কী-ওয়ার্ড লিখুন।</p>';
-                return;
-            }
-
-            outputDiv.innerHTML = '';
-            loader.classList.remove('hidden');
-            generateButton.disabled = true;
-
-            const systemPrompt = `You are a professional YouTube content strategist. Based on the user's niche, generate 3 highly trending and unique video ideas suitable for the Bangladeshi audience. The output should be a JSON array of objects, where each object has keys 'id' (number), 'title' (Bengali video title), and 'hook' (Bengali 1-sentence hook/description).`;
-
-            const userQuery = `Niche/Keyword: ${userTopic}. Generate 3 trending video ideas for YouTube in Bengali.`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: {
-                                "id": { "type": "NUMBER" },
-                                "title": { "type": "STRING" },
-                                "hook": { "type": "STRING" }
-                            },
-                            "propertyOrdering": ["id", "title", "hook"]
-                        }
-                    }
-                }
-            };
-
-            const options = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            };
-
-            try {
-                const response = await fetchWithRetry(API_URL, options);
-                const result = await response.json();
-                
-                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                
-                if (jsonText) {
-                    const parsedJson = JSON.parse(jsonText);
-                    let htmlContent = '<div class="space-y-3 mt-4">';
-                    
-                    if (Array.isArray(parsedJson)) {
-                        parsedJson.forEach(idea => {
-                            htmlContent += `
-                                <div class="bg-green-50 p-3 rounded-lg shadow-sm border border-green-400">
-                                    <h4 class="font-bold text-gray-800">${idea.id}. ${idea.title}</h4>
-                                    <p class="text-sm text-gray-600 italic">${idea.hook}</p>
-                                </div>
-                            `;
-                        });
-                    }
-                    htmlContent += '</div>';
-
-                    outputDiv.innerHTML = htmlContent;
-                } else {
-                    outputDiv.innerHTML = '<p class="text-red-500 font-semibold">আইডিয়া তৈরি করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।</p>';
-                }
-            } catch (error) {
-                console.error("Gemini API Error (Idea):", error);
-                outputDiv.innerHTML = '<p class="text-red-500 font-semibold">API যোগাযোগে ব্যর্থতা। আপনার ইন্টারনেট সংযোগ যাচাই করুন বা পরে আবার চেষ্টা করুন।</p>';
-            } finally {
-                loader.classList.add('hidden');
-                generateButton.disabled = false;
-            }
-        }
-    </script>
-
-    <!-- Floating Sticky CTA Button -->
-    <a href="#enroll" class="floating-cta hidden md:block">
-        <div class="text-lg font-bold mb-1 flex items-center">
-            <span class="mr-2 text-2xl">➡️</span> এনরোলমেন্ট শুরু: <span class="ml-1 font-extrabold text-[#7cf0ff]">২৫ অক্টোবর</span>
-        </div>
-        <div class="text-lg font-bold flex items-center">
-            <span class="mr-2 text-2xl">❌</span> এনরোলমেন্ট শেষ: <span class="ml-1 font-extrabold text-[#7cf0ff]">১৪ নভেম্বর</span>
-        </div>
-    </a>
-
-
-    <!-- Header Section -->
-    <header class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <!-- Logo using the uploaded file -->
-            <div class="logo-container">
-                <img src="https://placehold.co/150x40/f7f7f7/0d0a1b?text=EH+Science+Club+Logo" 
-                     onerror="this.onerror=null;this.src='uploaded:New Logo.jpg-ac38b78b-fc9a-44b4-9e36-d45fcabf7f4e'" 
-                     alt="EH Science Club Logo" class="h-full w-auto object-contain">
-            </div>
-            
-            <nav class="space-x-4 hidden md:block">
-                <a href="#features" class="text-gray-600 hover:text-indigo-600">কোর্সের সুবিধা</a>
-                <a href="#skills" class="text-gray-600 hover:text-indigo-600">দক্ষতা</a>
-                <a href="#team" class="text-gray-600 hover:text-indigo-600">আমাদের টিম</a>
-            </nav>
-            <a href="#enroll" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300">
-                এনরোল করুন
-            </a>
-        </div>
+    <!-- Header & Title Banner -->
+    <header class="bg-gray-800 text-white rounded-xl shadow-2xl p-6 mb-10 text-center">
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-1 tracking-wider">
+            ইউটিউব মাস্টারী কোর্স রুটিন
+        </h1>
+        <p class="text-xl sm:text-2xl font-light text-teal-300">
+            ব্যাচ ০২: লক্ষ্য পূরণের বিস্তারিত দৈনিক গাইডলাইন
+        </p>
     </header>
 
-    <!-- Hero/Banner Section (Based on Screenshot 120212.png) -->
-    <section class="relative pt-16 pb-24 text-center overflow-hidden" style="background: linear-gradient(180deg, #f0e6ff 0%, #fff 100%);">
-        <div class="container mx-auto px-4 relative z-10">
-            <h1 class="text-3xl md:text-5xl font-extrabold mb-3 leading-tight text-gray-900">
-                শূন্য থেকে শুরু করে হয়ে ওঠো প্রোফেশনাল কন্টেন্ট ক্রিয়েটর
-            </h1>
-            <p class="text-2xl md:text-3xl font-extrabold mb-8 max-w-5xl mx-auto">
-                <span class="text-gradient">নিশ্চিত করো তোমার মনিটাইজেশন ও প্যাসিভ ইনকাম!</span>
-            </p>
-            
-            <p class="text-base text-gray-600 mb-8 max-w-4xl mx-auto">
-                ২ মাসের গাইডেড কোর্স, যেখানে AI সহ অত্যাধুনিক কৌশল, কপিরাইট সুরক্ষা ও ১-অন-১ সাপোর্ট দেওয়া হয় – যার মাধ্যমে আমাদের শিক্ষার্থীরা সফলতার পথে হেঁটে চলেছে।
-            </p>
-
-            <a href="#enroll" class="bg-orange-500 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-orange-600 transition duration-300 shadow-xl transform hover:scale-105 inline-block">
-                এখনি এনরোল করো
-            </a>
-
-            <!-- Placeholder for Course Intro Video Thumbnail -->
-            <div class="mt-12 mx-auto max-w-6xl shadow-2xl rounded-xl overflow-hidden relative" style="background: linear-gradient(135deg, #e0cffc 0%, #f0f0ff 100%);">
-                <img src="https://placehold.co/1200x600/6f38c4/ffffff?text=YouTube+Mastery+Course+Video+Trailer" alt="কোর্স পরিচিতি ভিডিও" class="w-full h-auto object-cover opacity-80">
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <svg class="w-20 h-20 text-indigo-700 hover:text-indigo-900 cursor-pointer" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 3l12 9-12 9V3z"/>
-                    </svg>
-                </div>
+    <!-- Key Rules & Timeline -->
+    <section class="mb-10 bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+        <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">📅 কোর্সের সময়সূচি ও মূল নিয়মাবলী</h2>
+        
+        <div class="space-y-3 text-lg">
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium text-gray-600 w-full sm:w-1/3">কোর্সের সময়কাল:</span>
+                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">১৫ নভেম্বর – ১৫ জানুয়ারি (০২ মাস)</span>
+            </div>
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium text-gray-600 w-full sm:w-1/3">মোট কাজের দিন:</span>
+                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রায় ৪৪ দিন</span>
+            </div>
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium text-gray-600 w-full sm:w-1/3">ভিডিও আপলোড সময়:</span>
+                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রতিদিন সন্ধ্যা ৭:৩০ (শুক্রবার ও বড় ছুটি বাদে)</span>
+            </div>
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium text-gray-600 w-full sm:w-1/3">সাপ্তাহিক ছুটি:</span>
+                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রতি শুক্রবার (সম্পূর্ণ অফ)</span>
+            </div>
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium text-gray-600 w-full sm:w-1/3">দৈনিক হেল্পলাইন (Meet):</span>
+                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রতিদিন সন্ধ্যা ৪:০০ টা থেকে ৬:০০ টা পর্যন্ত (শুক্রবার ও বড় ছুটি বাদে)</span>
+            </div>
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-red-50 rounded-lg">
+                <span class="font-medium text-red-700 w-full sm:w-1/3">সার্টিফিকেট ও বিশেষ কেয়ার:</span>
+                <span class="font-bold text-red-700 w-full sm:w-2/3 sm:text-right">১৭ জানুয়ারি (৮০% বা তার বেশি মার্কস প্রাপ্তদের জন্য)</span>
             </div>
         </div>
     </section>
 
-    <!-- Problems vs. Solutions Section (Based on Screenshot 120202.png) -->
-    <section class="gradient-bg py-20 text-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-16 text-white">তোমার সমস্যা 😩 আমাদের সমাধান 😊</h2>
+    <!-- Course Modules (Accordion) -->
+    <h2 class="text-3xl font-extrabold mb-6 text-gray-800 text-center">🎓 কোর্স মডিউল ও দৈনিক রুটিন</h2>
 
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
-                
-                <!-- Problem 1 -->
-                <div class="text-center">
-                    <div class="card-bg p-6 rounded-xl shadow-lg mb-3">
-                        <p class="text-lg font-semibold">কী শিখব, কোথা থেকে শুরু করব—বুঝি না।</p>
-                    </div>
-                    <p class="text-2xl mb-3">⬇️</p>
-                    <div class="bg-green-700/50 p-6 rounded-xl shadow-lg">
-                        <p class="text-base font-semibold">আমরা পুরো আউটলাইন, গাইডলাইন এবং কোর্স মডিউল দিয়ে তোমার সাথে আছি।</p>
-                    </div>
-                </div>
-
-                <!-- Problem 2 -->
-                <div class="text-center">
-                    <div class="card-bg p-6 rounded-xl shadow-lg mb-3">
-                        <p class="text-lg font-semibold">স্কিল ও নলেজ নেই, ইনকাম হবে কিভাবে?</p>
-                    </div>
-                    <p class="text-2xl mb-3">⬇️</p>
-                    <div class="bg-green-700/50 p-6 rounded-xl shadow-lg">
-                        <p class="text-base font-semibold">২ মাসে লার্নিং নিশ্চিত হবে। নিজের নলেজ ও স্কিল দিয়ে প্যাসিভ ইনকাম করতে পারবে।</p>
-                    </div>
-                </div>
-                
-                <!-- Problem 3 -->
-                <div class="text-center">
-                    <div class="card-bg p-6 rounded-xl shadow-lg mb-3">
-                        <p class="text-lg font-semibold">হাল ছেড়ে চলে যেতে মন চায়।</p>
-                    </div>
-                    <p class="text-2xl mb-3">⬇️</p>
-                    <div class="bg-green-700/50 p-6 rounded-xl shadow-lg">
-                        <p class="text-base font-semibold">ডেডিকেটেড লাইভ সাপোর্ট, ১-অন-১ মেন্টরশিপের মাধ্যমে আমরা তোমাকে হারতে দেব না।</p>
-                    </div>
-                </div>
-
-                <!-- Problem 4 -->
-                <div class="text-center">
-                    <div class="card-bg p-6 rounded-xl shadow-lg mb-3">
-                        <p class="text-lg font-semibold">কপিরাইট ও মনিটাইজেশন শর্ত নিয়ে ভয়।</p>
-                    </div>
-                    <p class="text-2xl mb-3">⬇️</p>
-                    <div class="bg-green-700/50 p-6 rounded-xl shadow-lg">
-                        <p class="text-base font-semibold">কপিরাইট এড়ানোর প্রমাণিত কৌশল ও মনিটাইজেশন পর্যন্ত ফুল সাপোর্ট।</p>
-                    </div>
-                </div>
-            </div>
-            
-            <p class="text-xl font-bold text-center mt-12 text-[#b2f8ff]">
-                আমরা AI ও বিশ্বের সেরা সাপোর্ট সিস্টেম নিয়ে তোমার সব সমস্যার সমাধান দিতে প্রস্তুত!
-            </p>
-        </div>
-    </section>
-
-    <!-- X Factors Section (Key Benefits/USPs - Based on Screenshot 120157.png) -->
-    <section class="py-20 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">এই কোর্সের ✨ X ফ্যাক্টর</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- X Factor 1: AI Personalization -->
-                <div class="bg-blue-50/70 p-6 rounded-xl shadow-lg border border-blue-100">
-                    <h3 class="text-xl font-bold mb-2 text-blue-600">AI পার্সোনালাইজড লার্নিং</h3>
-                    <p class="text-gray-700 text-sm">Gemini AI ব্যবহার করে ব্যক্তিগত ফিডব্যাক ও কন্টেন্ট প্ল্যানিং। তোমার চ্যানেলের গ্রোথ অনুযায়ী আমাদের AI টিপস পাও, যা অন্য কোথাও পাওয়া যায় না।</p>
-                </div>
-                <!-- X Factor 2: 1:1 Mentorship -->
-                <div class="bg-purple-50/70 p-6 rounded-xl shadow-lg border border-purple-100">
-                    <h3 class="text-xl font-bold mb-2 text-purple-600">১:১ মেন্টরশিপ</h3>
-                    <p class="text-gray-700 text-sm">একজন সফল কন্টেন্ট ক্রিয়েটরের কাছ থেকে ব্যক্তিগত গাইডলাইন। প্রতিদিন ২ ঘণ্টা লাইভ সাপোর্ট সেশন (৪-৬ PM) এবং নিয়মিত ফলো-আপ।</p>
-                </p>
-                </div>
-                <!-- X Factor 3: Success Session -->
-                <div class="bg-red-50/70 p-6 rounded-xl shadow-lg border border-red-100">
-                    <h3 class="text-xl font-bold mb-2 text-red-600">সাপোর্ট সেশন ও রি-এক্সাম</h3>
-                    <p class="text-gray-700 text-sm">৯ দিন ধরে স্পেশাল কেয়ার এবং অ্যাসাইনমেন্টে ফেল করলে রি-এক্সামের সুযোগ—সফল না হওয়া পর্যন্ত আমরা আছি তোমার পাশে।</p>
-                </div>
-                <!-- X Factor 4: 24/7 Community Support -->
-                <div class="bg-orange-50/70 p-6 rounded-xl shadow-lg border border-orange-100">
-                    <h3 class="text-xl font-bold mb-2 text-orange-600">২৪/৭ কমিউনিটি সাপোর্ট</h3>
-                    <p class="text-gray-700 text-sm">দিন রাত ২৪ ঘণ্টা, সপ্তাহে ৭ দিন, তোমার যেকোনো সমস্যা সমাধানে আমাদের ডেডিকেটেড সাপোর্ট টিম সব সময় তোমার পাশে থাকবে।</p>
-                </div>
-                <!-- X Factor 5: Guided Enrollment -->
-                <div class="bg-green-50/70 p-6 rounded-xl shadow-lg border border-green-100">
-                    <h3 class="text-xl font-bold mb-2 text-green-600">গাইডেড এনরোলমেন্ট</h3>
-                    <p class="text-gray-700 text-sm">২ মাসের গাইডেড কোর্স, যেখানে AI সহ অত্যাধুনিক কৌশল এবং কপিরাইট সুরক্ষার গাইডলাইন পাবে। তোমার সফলতার জন্য এটাই যথেষ্ট।</p>
-                </div>
-                <!-- X Factor 6: Success Guarantee -->
-                <div class="bg-teal-50/70 p-6 rounded-xl shadow-lg border border-teal-100">
-                    <h3 class="text-xl font-bold mb-2 text-teal-600">সফলতার গ্যারান্টি</h3>
-                    <p class="text-gray-700 text-sm">চেষ্টা আপনার, সাহায্য আমাদের—সঠিক নির্দেশিকা অনুসরণ করলে মনিটাইজেশন পর্যন্ত ১০০% সাফল্যের প্রতিশ্রুতি।</p>
+    <div id="module-accordion" class="space-y-4">
+        
+        <!-- Module 1 -->
+        <div class="accordion-item bg-white rounded-xl shadow-xl overflow-hidden active">
+            <button class="accordion-header flex justify-between items-center w-full p-5 bg-teal-600 text-white text-left font-bold text-xl rounded-t-xl transition duration-300 hover:bg-teal-700 focus:outline-none" onclick="toggleAccordion(this)">
+                <span>মডিউল ১: ভিত্তি স্থাপন ও AI প্রস্তুতি (নভেম্বর ১৫ - ২৯)</span>
+                <span class="text-sm font-normal">(মোট কাজের দিন: ১০ দিন)</span>
+                <svg class="w-6 h-6 transform transition-transform duration-300 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content p-0">
+                <div class="module-table-container">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 w-1/12">তারিখ</th>
+                                <th class="px-6 py-3 w-1/12">দিন</th>
+                                <th class="px-6 py-3 w-5/12">ভিডিও টপিক (সন্ধ্যা ৭:৩০)</th>
+                                <th class="px-6 py-3 w-5/12">টাস্ক ও অ্যাসাইনমেন্ট</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-sm">
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১৪ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (কোর্স শুরুর দিন)</td>
+                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">১৫ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ফাউন্ডেশন]</span> ইউটিউব অ্যালগরিদমের রহস্য ও Niche নির্বাচন।</td>
+                                <td class="px-6 py-3">Niche/চ্যানেল টপিক চূড়ান্ত করা।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">১৬ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ফাউন্ডেশন]</span> প্রফেশনাল চ্যানেল সেটআপ (নাম, ডিসক্রিপশন, ট্যাগস)।</td>
+                                <td class="px-6 py-3">চ্যানেল তৈরি এবং অপ্টিমাইজেশন।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">১৭ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[AI প্রস্তুতি]</span> AI কন্টেন্ট ইকোসিস্টেম ও Gemini, ChatGPT-এর পরিচিতি।</td>
+                                <td class="px-6 py-3">AI প্ল্যাটফর্মগুলিতে অ্যাকাউন্ট তৈরি করা।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">১৮ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ব্র্যান্ডিং]</span> কাস্টম Logo, Banner ও Channel Art তৈরি।</td>
+                                <td class="px-6 py-3">লোগো ও ব্যানার ডিজাইন শেষ করা।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">১৯ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[প্রিমিয়াম টুলস]</span> Canva Pro ফ্রি অ্যাক্সেস সেটআপ ও ব্যবহারের কৌশল।</td>
+                                <td class="px-6 py-3">Canva-এর বেসিক ডিজাইন টুলস অনুশীলন।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">২০ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কন্টেন্ট সোর্স]</span> কপিরাইট ফ্রি ফুটেজ ও মিউজিক সংগ্রহের সেরা উপায়।</td>
+                                <td class="px-6 py-3">কন্টেন্ট সংগ্রহের জন্য ৩টি ওয়েবসাইট চিহ্নিত করা।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">২১ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">২২ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[শর্টস মাস্টারী]</span> Shorts vs Long-form কন্টেন্ট এবং ভাইরাল Shorts-এর কাঠামো।</td>
+                                <td class="px-6 py-3">শর্টস অ্যাসাইনমেন্টের জন্য প্রস্তুতি শুরু।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">২৩ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[মোবাইল এডিটিং]</span> মোবাইল দিয়ে হাই-এনগেজমেন্ট শর্টস ভিডিও এডিটিং (Step-by-Step)।</td>
+                                <td class="px-6 py-3">প্রথম টাস্ক: প্রথম শর্টস ভিডিও তৈরি শুরু।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">২৪ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ভাইরাল টাস্ক শুরু]</span> শর্টস ভিডিও অ্যাসাইনমেন্টের নিয়ম ও মার্কিং (৮০% পাস)।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: ১টি শর্টস ভিডিও তৈরি করে Facebook Inbox-এ সাবমিট।</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <!-- Skills Learned Section (Based on Screenshot 120144.png, replacing Modules Overview) -->
-    <section id="skills" class="py-20 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">তুমি কী কী শিখবে?</h2>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
-                
-                <!-- Skill 1: YouTube Algorithm -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-red-500">
-                    <h3 class="text-lg font-bold mb-2 text-red-600">YT Algorithm</h3>
-                    <p class="text-gray-700 text-sm">ইউটিউব কিভাবে কন্টেন্ট ভাইরাল করে? অ্যালগরিদমের রহস্য, Watch Time এবং CTR বাড়ানো।</p>
-                </div>
-                <!-- Skill 2: AI Mastery -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-blue-500">
-                    <h3 class="text-lg font-bold mb-2 text-blue-600">AI (Gemini & ChatGPT)</h3>
-                    <p class="text-gray-700 text-sm">Gemini AI দিয়ে স্ক্রিপ্ট, টাইটেল ও ডিসক্রিপশন তৈরি করা। AI-এর সঠিক ব্যবহার ও আপডেট থাকা।</p>
-                </div>
-                <!-- Skill 3: Video Editing -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-green-500">
-                    <h3 class="text-lg font-bold mb-2 text-green-600">Adobe Premiere Pro</h3>
-                    <p class="text-gray-700 text-sm">স্মুথ ট্রানজিশন, কালার কারেকশন, এবং হাই-এনগেজমেন্ট ভিডিও এডিটিং কৌশল।</p>
-                </div>
-                <!-- Skill 4: Canva Pro -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-purple-500">
-                    <h3 class="text-lg font-bold mb-2 text-purple-600">Canva & Photoshop</h3>
-                    <p class="text-gray-700 text-sm">প্রোফেশনাল থাম্বনেইল ডিজাইন, লোগো তৈরি এবং Canva Pro-এর ফ্রি অ্যাক্সেস।</p>
-                </div>
-                <!-- Skill 5: SEO & Tags -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-indigo-500">
-                    <h3 class="text-lg font-bold mb-2 text-indigo-600">SEO & Keyword Research</h3>
-                    <p class="text-gray-700 text-sm">ভিডিও Rank করানোর জন্য SEO-ফ্রেন্ডলি টাইটেল ও ট্যাগ ব্যবহারের গোপন কৌশল।</p>
-                </div>
-                <!-- Skill 6: Copyright Protection -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-yellow-500">
-                    <h3 class="text-lg font-bold mb-2 text-yellow-600">Copyright Security</h3>
-                    <p class="text-gray-700 text-sm">কপিরাইট Claim ও Strike এড়ানোর কৌশল এবং Fair Use Policy-এর সঠিক প্রয়োগ।</p>
-                </div>
-                <!-- Skill 7: Monetization -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-pink-500">
-                    <h3 class="text-lg font-bold mb-2 text-pink-600">YPP & AdSense</h3>
-                    <p class="text-gray-700 text-sm">YouTube Partner Program-এ সহজে আবেদন ও AdSense সেটআপ করার পূর্ণাঙ্গ গাইডলাইন।</p>
-                </div>
-                <!-- Skill 8: Analytics -->
-                <div class="card-bg-light p-5 rounded-xl shadow-lg border-t-4 border-teal-500">
-                    <h3 class="text-lg font-bold mb-2 text-teal-600">Analytics & VidIQ</h3>
-                    <p class="text-gray-700 text-sm">ভিডিও পারফর্ম্যান্স বিশ্লেষণ এবং গ্রোথ টুলস (VidIQ) ব্যবহার করে দ্রুত সফলতা।</p>
+        <!-- Module 2 -->
+        <div class="accordion-item bg-white rounded-xl shadow-xl overflow-hidden">
+            <button class="accordion-header flex justify-between items-center w-full p-5 bg-teal-600 text-white text-left font-bold text-xl transition duration-300 hover:bg-teal-700 focus:outline-none" onclick="toggleAccordion(this)">
+                <span>মডিউল ২: অ্যাডভান্সড AI, এডিটিং ও নিরাপত্তা (নভেম্বর ২৫ - ডিসেম্বর ২৮)</span>
+                <span class="text-sm font-normal">(মোট কাজের দিন: ২১ দিন + ছুটি)</span>
+                <svg class="w-6 h-6 transform transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content p-0">
+                <div class="module-table-container">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 w-1/12">তারিখ</th>
+                                <th class="px-6 py-3 w-1/12">দিন</th>
+                                <th class="px-6 py-3 w-5/12">ভিডিও টপিক (সন্ধ্যা ৭:৩০)</th>
+                                <th class="px-6 py-3 w-5/12">টাস্ক ও অ্যাসাইনমেন্ট</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-sm">
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">২৫ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[AI স্ক্রিপ্ট]</span> Gemini ব্যবহার করে ভাইরাল স্ক্রিপ্ট ও টাইটেল জেনারেশন।</td>
+                                <td class="px-6 py-3">টাস্ক: AI ব্যবহার করে পরবর্তী শর্টস স্ক্রিপ্ট তৈরি।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">২৬ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[মনিটাইজেশন নিরাপত্তা]</span> অন্যের ভিডিও ব্যবহার ও কপিরাইট এড়ানোর কৌশল।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">২৭ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অডিও এডিটিং]</span> Audacity দিয়ে ভয়েস এডিটিং ও প্রো সাউন্ড কোয়ালিটি নিশ্চিত করা।</td>
+                                <td class="px-6 py-3">টাস্ক: ভয়েস রেকর্ডিং ও এডিটিং অনুশীলন।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">২৮ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">২৯ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[থাম্বনেইল জাদু]</span> Eye-Catching Thumbnail তৈরি করার নিয়ম ও CTR বৃদ্ধি।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">৩০ নভেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ভিডিও এডিটিং]</span> Adobe Premiere Pro: বেসিক ইন্টারফেস ও কাট-টু-কাট এডিটিং।</td>
+                                <td class="px-6 py-3">টাস্ক: Premiere Pro ইন্টারফেস পরিচিতি।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">০১ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[এঙ্গেজমেন্ট]</span> Audience Retention বাড়ানোর গোপন কৌশল ও ৫টি প্রো টিপস।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">০২ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[লং-ফর্ম প্রস্তুতি]</span> Long-form ভিডিও তৈরির কাঠামো ও প্ল্যানিং।</td>
+                                <td class="px-6 py-3">লং-ফর্ম ভিডিওর টপিক চূড়ান্ত করা।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">০৩ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">০৪ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">০৫ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">০৬ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[AI মাল্টিমিডিয়া]</span> AI দিয়ে ইমেজ, ভয়েসওভার ও মিউজিক তৈরি।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">০৭ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অ্যাডভান্সড এডিটিং]</span> Premiere Pro: স্মুথ ট্রানজিশন ও কালার কারেকশন।</td>
+                                <td class="px-6 py-3">টাস্ক: লং ভিডিওর এডিটিং শুরু।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">০৮ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[SEO রুলস]</span> SEO-ফ্রেন্ডলি ভিডিও টাইটেল, ট্যাগ ও ডিসক্রিপশন তৈরি।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">০৯ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১০ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১১ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১২ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">১৩ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কন্টেন্ট রিপারপোসিং]</span> ১টি ভিডিও থেকে ৫টি ইনকাম সোর্স বের করা।</td>
+                                <td class="px-6 py-3">লং ভিডিও টাস্কের ডেডলাইন ঘোষণা।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">১৪ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কাস্টম গাইড]</span> আপনার Niche অনুযায়ী ভিডিও সোর্স খুঁজে বের করা।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১৫ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১৬ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১৭ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১৮ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১৯ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">২০ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[গ্রোথ টুলস]</span> VidIQ এবং SEO Checker Tools-এর ব্যবহার।</td>
+                                <td class="px-6 py-3">টাস্ক: VidIQ সেটআপ ও ব্যবহার।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">২১ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[লং ভিডিও সাবমিশন]</span> অর্ধ-কোর্স মূল্যায়ন: লং ভিডিও সাবমিশন ও রিভিউ।</td>
+                                <td class="px-6 py-3 font-bold text-red-600">টাস্ক: লং ভিডিও সাবমিট (প্রথম লং টাস্ক)।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">২২ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">২৩ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">২৪ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">২৫ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3 font-semibold">বড়দিনের ছুটি (ঐচ্ছিক)</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[YPP গাইড]</span> YouTube Partner Program (YPP) এপ্লাই করার নিয়ম।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">২৬ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">২৭ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অ্যাডসেন্স]</span> AdSense Setup ও PIN Verification প্রক্রিয়া।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">২৮ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[পেমেন্ট]</span> YouTube-এর টাকা ব্যাংক বা মোবাইল ব্যাংকিংয়ে নেওয়ার সহজ উপায়।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- 4 Steps to Success Section (Based on Screenshot 120151.png) -->
-    <section id="steps" class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">সাফল্য পাওয়ার ৪টি সহজ ধাপ</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Step 1 -->
-                <div class="p-6 rounded-xl bg-purple-50 shadow-md text-center">
-                    <div class="text-5xl font-extrabold text-purple-600 mb-3">০১</div>
-                    <h3 class="text-xl font-bold mb-2 text-gray-900">এনরোলমেন্ট নিশ্চিত করো</h3>
-                    <p class="text-gray-700 text-sm">সিট সীমিত! আজই Pre-Enrollment এর মাধ্যমে তোমার আসন নিশ্চিত করে কোর্সে যোগ দাও।</p>
-                </div>
-                <!-- Step 2 -->
-                <div class="p-6 rounded-xl bg-purple-100 shadow-md text-center">
-                    <div class="text-5xl font-extrabold text-purple-600 mb-3">০২</div>
-                    <h3 class="text-xl font-bold mb-2 text-gray-900">গাইডলাইন / মেন্টরশিপ নাও</h3>
-                    <p class="text-gray-700 text-sm">আমাদের ডেডিকেটেড সাপোর্ট সিস্টেমের সাথে যুক্ত হও এবং ১-অন-১ গাইডলাইন নিয়ে কাজ শুরু করো।</p>
-                </div>
-                <!-- Step 3 -->
-                <div class="p-6 rounded-xl bg-purple-50 shadow-md text-center">
-                    <div class="text-5xl font-extrabold text-purple-600 mb-3">০৩</div>
-                    <h3 class="text-xl font-bold mb-2 text-gray-900">কোর্স ফিনিশ করো</h3>
-                    <p class="text-gray-700 text-sm">ভিডিও টাস্ক, শর্টস এবং লং-ফর্ম প্রজেক্ট সাবমিট করে ২ মাসের মধ্যে কোর্স সাফল্যের সাথে শেষ করো।</p>
-                </div>
-                <!-- Step 4 -->
-                <div class="p-6 rounded-xl bg-purple-100 shadow-md text-center">
-                    <div class="text-5xl font-extrabold text-purple-600 mb-3">০৪</div>
-                    <h3 class="text-xl font-bold mb-2 text-gray-900">মনিটাইজেশন শুরু করো</h3>
-                    <p class="text-gray-700 text-sm">আমাদের প্রমাণিত পদ্ধতির মাধ্যমে তুমি তোমার চ্যানেলের মনিটাইজেশন নিশ্চিত করে প্যাসিভ ইনকাম শুরু করো।</p>
-                </div>
-            </div>
-            
-            <div class="flex justify-center space-x-4 mt-12">
-                <a href="#enroll" class="bg-orange-500 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-orange-600 transition duration-300 shadow-xl transform hover:scale-105">
-                    এখনি এনরোল করো
-                </a>
-                <a href="#details" class="bg-gray-200 text-gray-800 px-8 py-3 rounded-full font-bold text-lg hover:bg-gray-300 transition duration-300 shadow-md transform hover:scale-105">
-                    ফ্রি গাইডলাইন নাও
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Practical Tasks Section (Projects adaptation - Based on Screenshot 120232.png) -->
-    <section class="py-20 gradient-bg text-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-12 text-white">তুমি যেসব টাস্ক করবে</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                <!-- Task 1: Viral Shorts Project -->
-                <div class="card-bg p-6 rounded-xl shadow-lg border border-gray-700">
-                    <img src="https://placehold.co/400x250/2c2c54/ffffff?text=Viral+Shorts+Mockup" alt="Viral Shorts Project" class="w-full h-auto rounded-lg mb-4">
-                    <h3 class="text-xl font-bold text-[#b2f8ff] mb-2">Viral Shorts Project</h3>
-                    <p class="text-gray-300 text-sm mb-3">কম সময়ে ভাইরাল হওয়ার জন্য কীভাবে Shorts তৈরি করতে হয়, তার কৌশল হাতে-কলমে শিখুন। Facebook, TikTok ও YouTube Shorts-এর জন্য আলাদাভাবে কন্টেন্ট তৈরি করুন।</p>
-                    <a href="#" class="text-indigo-400 hover:text-indigo-200 font-semibold text-sm flex items-center">
-                        বিস্তারিত দেখুন 
-                        <span class="ml-1">→</span>
-                    </a>
-                </div>
-
-                <!-- Task 2: Long-Form SEO Video -->
-                <div class="card-bg p-6 rounded-xl shadow-lg border border-gray-700">
-                    <img src="https://placehold.co/400x250/2c2c54/ffffff?text=Long-Form+Video+Mockup" alt="Long-Form SEO Video" class="w-full h-auto rounded-lg mb-4">
-                    <h3 class="text-xl font-bold text-[#b2f8ff] mb-2">Long-Form SEO Video</h3>
-                    <p class="text-gray-300 text-sm mb-3">অ্যালগরিদমের জন্য উপযোগী করে কীভাবে একটি সম্পূর্ণ লং-ফর্ম ভিডিও (৩০ মিনিট) এডিট, SEO এবং আপলোড করতে হয়, সেই প্রজেক্ট তৈরি করুন।</p>
-                    <a href="#" class="text-indigo-400 hover:text-indigo-200 font-semibold text-sm flex items-center">
-                        বিস্তারিত দেখুন 
-                        <span class="ml-1">→</span>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="text-center mt-10">
-                <a href="#modules" class="bg-gray-700 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-600 transition duration-300">
-                    আরও টাস্ক দেখো
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Gemini AI Tool Section (Updated to include two tools) -->
-    <section id="ai-tools-mastery" class="py-20 bg-gray-100">
-        <div class="container mx-auto px-4 max-w-6xl text-center">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">AI টুলস মাস্টারী ✨ (EH Science Club এর AI)</h2>
-            <p class="text-lg text-gray-600 mb-8">কোর্সে এনরোল করার আগেই আমাদের AI প্রযুক্তির ক্ষমতা অনুভব করুন।</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Tool 1: Viral Title Generator -->
-                <div class="bg-white p-6 rounded-xl shadow-xl text-left">
-                    <h3 class="text-2xl font-bold text-indigo-600 mb-4 border-b pb-2">১. ভাইরাল টাইটেল জেনারেটর</h3>
-                    <label for="videoTopic" class="block text-gray-700 font-semibold mb-2">আপনার ভিডিও টপিক লিখুন:</label>
-                    <input type="text" id="videoTopic" placeholder="যেমন: নতুন ইউটিউব চ্যানেল কীভাবে গ্রো করব?" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
-                    
-                    <button id="generateButton" onclick="generateSeoContent()" class="w-full bg-pink-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-pink-700 transition duration-300 shadow-md transform hover:scale-[1.01]">
-                        কন্টেন্ট তৈরি করুন
-                    </button>
-
-                    <!-- Loader -->
-                    <div id="loader" class="hidden mt-6 text-indigo-600 font-semibold">
-                        <svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        AI কন্টেন্ট তৈরি হচ্ছে, অপেক্ষা করুন...
-                    </div>
-
-                    <!-- Output -->
-                    <div id="seoOutput" class="mt-6 text-center">
-                        <!-- AI generated content will appear here -->
-                    </div>
-                </div>
-
-                <!-- Tool 2: Niche Idea Brainstormer -->
-                <div class="bg-white p-6 rounded-xl shadow-xl text-left">
-                    <h3 class="text-2xl font-bold text-green-600 mb-4 border-b pb-2">২. ট্রেন্ডিং আইডিয়া ফাইন্ডার</h3>
-                    <label for="nicheKeyword" class="block text-gray-700 font-semibold mb-2">আপনার Niche/কী-ওয়ার্ড লিখুন:</label>
-                    <input type="text" id="nicheKeyword" placeholder="যেমন: স্বাস্থ্য টিপস বা গেমিং" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-800">
-                    
-                    <button id="ideaButton" onclick="generateContentIdeas()" class="w-full bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-green-700 transition duration-300 shadow-md transform hover:scale-[1.01]">
-                        আইডিয়া জেনারেট করুন
-                    </button>
-                    
-                    <div id="ideaLoader" class="hidden mt-6 text-green-600 font-semibold text-center">
-                        <svg class="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        ট্রেন্ডিং আইডিয়া তৈরি হচ্ছে...
-                    </div>
-                    <div id="ideaOutput" class="mt-6">
-                        <!-- AI generated content ideas will appear here -->
-                    </div>
-                </div>
-            </div>
-            <p class="text-xl font-bold text-gray-700 mt-10">আমরা কোর্সে এই ধরণের AI টুলের সঠিক ব্যবহার শেখাই, যা আপনার সময় বাঁচাবে!</p>
-        </div>
-    </section>
-
-
-    <!-- Testimonial/Success Stories Section (Based on Screenshot 120244.jpg) -->
-    <section class="py-20 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">শিক্ষার্থীদের সফলতার গল্প</h2>
-            <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">যারা আমাদের পদ্ধতি অনুসরণ করে সফল হয়েছেন, তাদের কিছু কথা:</p>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Mock Testimonial 1 -->
-                <div class="p-6 rounded-xl shadow-xl border border-gray-100 bg-gray-50">
-                    <p class="text-3xl mb-3 text-yellow-500">★★★★★</p>
-                    <p class="text-gray-700 italic text-sm mb-4">"কোর্সের আগে শুধু হতাশ হতাম। AI এবং এডিটিং-এর কৌশলগুলো শেখার পর প্রথম মাসেই চ্যানেলে বুস্ট পেলাম। এখন প্রতি মাসে নিয়মিত ইনকাম হচ্ছে।"</p>
-                    <div class="flex items-center">
-                        <img src="https://placehold.co/40x40/8b5cf6/ffffff?text=A" alt="Student 1" class="w-10 h-10 rounded-full mr-3">
-                        <div>
-                            <p class="font-bold text-gray-900 text-sm">নাজমুল ইসলাম</p>
-                            <p class="text-xs text-indigo-600">বর্তমানে মনিটাইজড</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mock Testimonial 2 -->
-                <div class="p-6 rounded-xl shadow-xl border border-gray-100 bg-gray-50">
-                    <p class="text-3xl mb-3 text-yellow-500">★★★★★</p>
-                    <p class="text-gray-700 italic text-sm mb-4">"কপিরাইট নিয়ে সব ভয় কেটে গেছে। স্যার যেভাবে ১-অন-১ সাপোর্ট দিয়েছেন, তা অবিশ্বাস্য! কোর্সটি সত্যিই আমার জীবনের টার্নিং পয়েন্ট।"</p>
-                    <div class="flex items-center">
-                        <img src="https://placehold.co/40x40/f97316/ffffff?text=B" alt="Student 2" class="w-10 h-10 rounded-full mr-3">
-                        <div>
-                            <p class="font-bold text-gray-900 text-sm">ফারজানা রহমান</p>
-                            <p class="text-xs text-indigo-600">৭ দিনে ১০০০+ সাবস্ক্রাইবার</p>
-                        </div>
-                    </div>
-                </div>
-                
-                 <!-- Mock Testimonial 3 -->
-                <div class="p-6 rounded-xl shadow-xl border border-gray-100 bg-gray-50">
-                    <p class="text-3xl mb-3 text-yellow-500">★★★★★</p>
-                    <p class="text-gray-700 italic text-sm mb-4">"আমি অনেক দেরিতে শুরু করেছি, কিন্তু ২ মাসের মধ্যেই মনিটাইজেশন পেলাম। লেগে থাকার জন্য যে সাপোর্ট দরকার, EH Science Club সেটাই দিয়েছে।"</p>
-                    <div class="flex items-center">
-                        <img src="https://placehold.co/40x40/22c55e/ffffff?text=C" alt="Student 3" class="w-10 h-10 rounded-full mr-3">
-                        <div>
-                            <p class="font-bold text-gray-900 text-sm">কামরুল হাসান</p>
-                            <p class="text-xs text-indigo-600">প্যাসিভ ইনকাম শুরু</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mock Testimonial 4 -->
-                <div class="p-6 rounded-xl shadow-xl border border-gray-100 bg-gray-50">
-                    <p class="text-3xl mb-3 text-yellow-500">★★★★★</p>
-                    <p class="text-gray-700 italic text-sm mb-4">"Adobe Premiere Pro, Audacity ও AI - এতগুলো টুলের ব্যবহার এত সহজে শেখা সম্ভব ছিল না। এখন আমার কন্টেন্ট প্রোফেশনাল লেভেলের।"</p>
-                    <div class="flex items-center">
-                        <img src="https://placehold.co/40x40/ef4444/ffffff?text=D" alt="Student 4" class="w-10 h-10 rounded-full mr-3">
-                        <div>
-                            <p class="font-bold text-gray-900 text-sm">নুসরাত জাহান</p>
-                            <p class="text-xs text-indigo-600">সেরা এডিটিং স্কিল</p>
-                        </div>
-                    </div>
+        <!-- Module 3 -->
+        <div class="accordion-item bg-white rounded-xl shadow-xl overflow-hidden">
+            <button class="accordion-header flex justify-between items-center w-full p-5 bg-teal-600 text-white text-left font-bold text-xl transition duration-300 hover:bg-teal-700 focus:outline-none" onclick="toggleAccordion(this)">
+                <span>মডিউল ৩: মনিটাইজেশন ও চূড়ান্ত গ্রোথ (ডিসেম্বর ২৯ - জানুয়ারি ১৫)</span>
+                <span class="text-sm font-normal">(মোট কাজের দিন: ১৩ দিন + ছুটি)</span>
+                <svg class="w-6 h-6 transform transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content p-0">
+                <div class="module-table-container">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 w-1/12">তারিখ</th>
+                                <th class="px-6 py-3 w-1/12">দিন</th>
+                                <th class="px-6 py-3 w-5/12">ভিডিও টপিক (সন্ধ্যা ৭:৩০)</th>
+                                <th class="px-6 py-3 w-5/12">টাস্ক ও অ্যাসাইনমেন্ট</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-sm">
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">২৯ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কপিরাইট নিরাপত্তা]</span> Copyright Claim ও Strike এড়ানোর কৌশল এবং সমাধান।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">৩০ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[শেষ প্রস্তুতি]</span> কোন ভিডিও Monetization পাবে, কোনগুলো পাবে না?।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">৩১ ডিসেম্বর</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[চূড়ান্ত পর্যালোচনা]</span> ভুল Niche Selection ও ব্যর্থতার কারণগুলো এড়ানো।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">০১ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3 font-semibold">নববর্ষের ছুটি (ঐচ্ছিক)</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ফাইনাল ক্লাস]</span> কোর্স রিভিউ, প্রশ্ন-উত্তর ও পরবর্তী পদক্ষেপ।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">০২ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">০৩ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[চূড়ান্ত টাস্ক]</span> সকল বকেয়া টাস্ক ও রি-এক্সাম সাবমিশনের শেষ দিন।</td>
+                                <td class="px-6 py-3 font-bold text-red-600">চূড়ান্ত টাস্ক সাবমিশন।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">০৪ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অতিরিক্ত ক্লাস]</span> বিশেষ ক্যাটাগরি অনুসারে কন্টেন্ট গ্রোথ স্ট্র্যাটেজি।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">০৯ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
+                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">১০ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অতিরিক্ত ক্লাস]</span> সফল কন্টেন্ট ক্রিয়েটরদের কেস স্টাডি ও শেখার বিষয়।</td>
+                                <td class="px-6 py-3 font-semibold text-red-600">টাস্ক: লং ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">১১ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
+                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অতিরিক্ত ক্লাস]</span> ফেসবুক ও ইউটিউব Short Algorithm-এর সাম্প্রতিক আপডেট।</td>
+                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১২ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-red-50 text-red-700">
+                                <td class="px-6 py-3 whitespace-nowrap">১৩ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
+                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
+                                <td class="px-6 py-3"></td>
+                            </tr>
+                            <tr class="bg-teal-50">
+                                <td class="px-6 py-3 whitespace-nowrap">১৪ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
+                                <td class="px-6 py-3 font-bold text-lg text-gray-800">কোর্স সমাপ্তি</td>
+                                <td class="px-6 py-3">চূড়ান্ত মার্কস গণনা ও ফলাফল তৈরি।</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-3 whitespace-nowrap">১৫ জানুয়ারি</td>
+                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
+                                <td class="px-6 py-3 font-bold text-lg text-gray-800">চূড়ান্ত ফলাফল ঘোষণা</td>
+                                <td class="px-6 py-3">ফাইনাল মার্কস ও সার্টিফিকেট প্রাপকের তালিকা।</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <!-- Team Section -->
-    <section id="team" class="py-20 gradient-bg text-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-12 text-white">👨‍💻 আমাদের অভিজ্ঞ টিম</h2>
-            <p class="text-center text-gray-300 mb-10 max-w-3xl mx-auto">আমরা শুধুমাত্র প্রশিক্ষক নই, আপনার সফলতার অংশীদার। আমাদের সম্মিলিত জ্ঞান আপনার পথকে সহজ করবে।</p>
+    </div>
 
-            <div class="flex flex-col md:flex-row justify-center space-y-8 md:space-y-0 md:space-x-10">
-                <!-- Team Member 1 - Head Instructor -->
-                <div class="bg-[#1f1d36] p-6 rounded-xl shadow-2xl text-center max-w-xs mx-auto">
-                    <img src="https://placehold.co/100x100/3e387c/ffffff?text=EKRAMUL" alt="Md. Ekramul Hoque" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-[#b2f8ff]">
-                    <h3 class="text-xl font-bold text-white">Md. Ekramul Hoque</h3>
-                    <p class="text-indigo-400 font-semibold mb-2">প্রতিষ্ঠাতা ও প্রধান প্রশিক্ষক</p>
-                    <p class="text-sm text-gray-400">কোর্স কারিকুলাম তৈরি, অ্যাডভান্সড ইউটিউব কৌশল ও প্ল্যাটফর্ম পরিচালনার দায়িত্বে নিয়োজিত।</p>
-                </div>
-
-                <!-- Team Member 2 - Senior Strategist -->
-                <div class="bg-[#1f1d36] p-6 rounded-xl shadow-2xl text-center max-w-xs mx-auto">
-                    <img src="https://placehold.co/100x100/3e387c/ffffff?text=MEHEJABIN" alt="Mrs. Mehejabin Islam" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-[#b2f8ff]">
-                    <h3 class="text-xl font-bold text-white">Mrs. Mehejabin Islam</h3>
-                    <p class="text-indigo-400 font-semibold mb-2">সিনিয়র গ্রোথ স্ট্র্যাটেজিস্ট</p>
-                    <p class="text-sm text-gray-400">ফেসবুক মার্কেটিং, অ্যাডভান্সড SEO এবং হাই-রিচ কন্টেন্ট তৈরির কৌশল বিশেষজ্ঞ।</p>
-                </div>
-
-                <!-- Team Member 3 - Content Manager -->
-                <div class="bg-[#1f1d36] p-6 rounded-xl shadow-2xl text-center max-w-xs mx-auto">
-                    <img src="https://placehold.co/100x100/3e387c/ffffff?text=HRIDOY" alt="Md. Hridoy" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-[#b2f8ff]">
-                    <h3 class="text-xl font-bold text-white">Md. Hridoy</h3>
-                    <p class="text-indigo-400 font-semibold mb-2">কন্টেন্ট ও অ্যানালিটিকস ম্যানেজার</p>
-                    <p class="text-sm text-gray-400">হাই-এনগেজমেন্ট ভিডিও কন্টেন্ট এবং ইউটিউব অ্যানালিটিকস বিশেষজ্ঞ।</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- FAQ Section (Based on Screenshot 120256.png) -->
-    <section id="faq" class="py-20 bg-gray-100">
-        <div class="container mx-auto px-4 max-w-4xl">
-            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">তোমার যত প্রশ্ন বুটক্যাম্প সম্পর্কে</h2>
-            
-            <div class="space-y-4">
-                
-                <!-- FAQ Item 1 -->
-                <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-indigo-500 cursor-pointer" onclick="toggleFaq('faq1')">
-                    <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-gray-900">০১. এই কোর্স কাদের জন্য?</span>
-                        <span id="icon-faq1" class="text-xl font-bold">+</span>
-                    </div>
-                    <p id="faq1" class="text-gray-700 text-sm mt-3 hidden">
-                        যারা ইউটিউব থেকে প্যাসিভ ইনকাম করতে চান, চ্যানেল আছে কিন্তু গ্রোথ হচ্ছে না, অথবা AI ব্যবহার করে কম সময়ে কন্টেন্ট ক্রিয়েশন শিখতে চান—এই কোর্সটি তাদের জন্য।
-                    </p>
-                </div>
-                
-                <!-- FAQ Item 2 -->
-                <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-indigo-500 cursor-pointer" onclick="toggleFaq('faq2')">
-                    <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-gray-900">০২. আপনারা কি মনিটাইজেশনের গ্যারান্টি দিতে পারেন?</span>
-                        <span id="icon-faq2" class="text-xl font-bold">+</span>
-                    </div>
-                    <p id="faq2" class="text-gray-700 text-sm mt-3 hidden">
-                        আমরা সরাসরি গ্যারান্টি না দিয়ে **১০০% সাফল্যের প্রতিশ্রুতি** দিই। কারণ সফলতা নির্ভর করে আপনার প্রচেষ্টার ওপর। আমরা আপনাকে কৌশল, টুলস এবং মনিটাইজেশন পর্যন্ত ১-অন-১ সাপোর্ট দেবো। যদি আপনি লেগে থাকেন, সফলতা নিশ্চিত।
-                    </p>
-                </div>
-                
-                <!-- FAQ Item 3 -->
-                <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-indigo-500 cursor-pointer" onclick="toggleFaq('faq3')">
-                    <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-gray-900">০৩. আমি কি পড়াশোনা ও পরীক্ষার পাশাপাশি এই কোর্স শেষ করতে পারব?</span>
-                        <span id="icon-faq3" class="text-xl font-bold">+</span>
-                    </div>
-                    <p id="faq3" class="text-gray-700 text-sm mt-3 hidden">
-                        হ্যাঁ, অবশ্যই। দৈনিক মাত্র ৩০ মিনিটের ভিডিও ক্লাস এবং সপ্তাহে একটি লং প্রজেক্ট টাস্ক থাকায়, আপনি সহজেই আপনার রুটিন ঠিক রেখে কোর্সটি শেষ করতে পারবেন।
-                    </p>
-                </div>
-            </div>
-            
-            <div class="text-center mt-10">
-                 <a href="#enroll" class="bg-gray-700 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-600 transition duration-300">
-                    আরও জানতে যোগাযোগ করুন
-                </a>
-            </div>
-            
-        </div>
-    </section>
-
-    <!-- Final CTA / Enrollment Section (Adjusted to final screenshot flow and removing Bkash) -->
-    <section id="enroll" class="relative pt-20 pb-20 text-center overflow-hidden" style="background: linear-gradient(135deg, #1f1d36 0%, #3e387c 100%);">
-        <div class="container mx-auto px-4 relative z-10 max-w-4xl">
-            <h2 class="text-4xl font-extrabold text-[#b2f8ff] mb-4">তাহলে আর দেরি কেন?</h2>
-            <p class="text-xl text-gray-300 mb-8">
-                এই মুহূর্তে নিজেকে AI এবং কন্টেন্ট ক্রিয়েশনে বিনিয়োগ করুন, নিজের জন্য প্যাসিভ ইনকাম তৈরি করুন।
-            </p>
-            
-            <!-- Enrollment Button Group (Single button similar to the image) -->
-            <div class="flex justify-center space-x-4">
-                <a href="#" class="bg-pink-600 text-white px-10 py-4 rounded-xl font-bold text-xl hover:bg-pink-700 transition duration-300 shadow-lg transform hover:scale-105">
-                    এখনি এনরোল করুন
-                </a>
-            </div>
-            
-            <p class="mt-8 text-lg font-semibold text-gray-200">
-                কোর্স শুরু হচ্ছে **১৪ নভেম্বর**। সিট সীমিত—দ্রুত এনরোল করে নিজের জায়গা নিশ্চিত করুন!
-            </p>
+    <!-- Final Evaluation Section -->
+    <section class="mt-12 bg-teal-100 p-6 rounded-xl shadow-lg border-l-8 border-teal-600">
+        <h2 class="text-2xl font-bold mb-4 text-teal-800 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.002 12.002 0 0012 21.025c3.555-.608 6.755-2.614 9.176-5.419a12.002 12.002 0 00-4.558-13.684z"></path></svg>
+            ✅ চূড়ান্ত মূল্যায়ন ও সার্টিফিকেট বিতরণ
+        </h2>
+        <div class="space-y-3 text-gray-700">
+            <p class="text-lg"><strong>১৬ জানুয়ারি:</strong> চূড়ান্ত ফলাফল প্রস্তুত করা হবে।</p>
+            <p class="text-lg font-bold text-teal-700">১৭ জানুয়ারি (শনিবার): সার্টিফিকেট বিতরণ ও বিশেষ গ্রুপিং শুরু হবে।</p>
+            <ul class="task-list pl-0">
+                <li class="p-2 bg-teal-200 rounded-md">সার্টিফিকেট বিতরণ: কোর্সের অ্যাসাইনমেন্টে গড়ে <strong class="text-xl">৮০% বা তার বেশি মার্কস</strong> অর্জনকারীদের জন্য।</li>
+                <li class="p-2 bg-teal-200 rounded-md">বিশেষ গ্রুপিং: উত্তীর্ণ শিক্ষার্থীদের জন্য একটি স্পেশাল গ্রুপ তৈরি করা হবে।</li>
+                <li class="p-2 bg-teal-200 rounded-md">৭ দিনের বিশেষ কেয়ার: এই গ্রুপে আগামী ৭ দিনের জন্য (১৭ জানুয়ারি থেকে ২৩ জানুয়ারি) ভিডিও আপলোড, SEO, টার্গেটিং সহ সকল খুঁটিনাটি বিষয় হাতে ধরে ব্যক্তিগতভাবে শিখিয়ে দেওয়া হবে।</li>
+            </ul>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="gradient-bg text-white py-12">
-        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-                <h3 class="text-2xl font-bold text-[#b2f8ff] mb-4">EH Science Club</h3>
-                <p class="text-sm text-gray-400">
-                    YouTube Mastery-এর মাধ্যমে কন্টেন্ট ক্রিয়েশন জগতে বিপ্লব আনুন। চেষ্টা আপনার, সাহায্য আমাদের।
-                </p>
-            </div>
-            <div>
-                <h4 class="font-bold mb-3 text-white">গুরুত্বপূর্ণ লিঙ্ক</h4>
-                <ul class="space-y-2 text-sm text-gray-400">
-                    <li><a href="#features" class="hover:text-[#b2f8ff]">কোর্সের সুবিধা</a></li>
-                    <li><a href="#skills" class="hover:text-[#b2f8ff]">দক্ষতা</a></li>
-                    <li><a href="#faq" class="hover:text-[#b2f8ff]">FAQ</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold mb-3 text-white">যোগাযোগ</h4>
-                <ul class="space-y-2 text-sm text-gray-400">
-                    <li>ইমেইল: ehscienceclub.official@gmail.com</li>
-                    <li>হটলাইন (WhatsApp): 01792243520</li>
-                    <li>স্থান: ঢাকা, বাংলাদেশ</li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold mb-3 text-white">সামাজিক মাধ্যম</h4>
-                <div class="flex space-x-3">
-                    <span class="text-2xl hover:text-[#b2f8ff]">📘</span>
-                    <span class="text-2xl hover:text-[#b2f8ff]">▶️</span>
-                    <span class="text-2xl hover:text-[#b2f8ff]">🎵</span>
-                </div>
-            </div>
-        </div>
-        <div class="mt-8 pt-4 border-t border-gray-700 text-center">
-            <p class="text-sm text-gray-500">
-                &copy; 2025 EH Science Club. All Rights Reserved.
-            </p>
-        </div>
+    <footer class="mt-10 text-center text-gray-500 text-sm p-4 border-t border-gray-300">
+        <p>এটি একটি YouTube Mastery Course (Batch 02) এর ডিজিটাল রুটিন।</p>
     </footer>
-    
+
+    <!-- JavaScript for Accordion Functionality -->
     <script>
-        function toggleFaq(id) {
-            const content = document.getElementById(id);
-            const icon = document.getElementById('icon-' + id);
+        function toggleAccordion(button) {
+            const item = button.parentElement;
+            const content = item.querySelector('.accordion-content');
+            const svg = button.querySelector('svg');
             
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                icon.textContent = '-';
+            // Close all other open items
+            document.querySelectorAll('.accordion-item.active').forEach(openItem => {
+                if (openItem !== item) {
+                    openItem.classList.remove('active');
+                    openItem.querySelector('.accordion-content').style.maxHeight = null;
+                    openItem.querySelector('svg').classList.remove('rotate-180');
+                }
+            });
+
+            // Toggle the current item
+            if (item.classList.contains('active')) {
+                item.classList.remove('active');
+                content.style.maxHeight = null;
+                svg.classList.remove('rotate-180');
             } else {
-                content.classList.add('hidden');
-                icon.textContent = '+';
+                item.classList.add('active');
+                // Set max-height to the content's scroll height to enable smooth transition
+                content.style.maxHeight = content.scrollHeight + "px";
+                svg.classList.add('rotate-180');
             }
         }
+
+        // Adjust max-height on window resize for responsiveness
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.accordion-item.active').forEach(item => {
+                const content = item.querySelector('.accordion-content');
+                // Temporarily disable transition during resize for immediate update
+                content.style.transition = 'none';
+                content.style.maxHeight = content.scrollHeight + "px";
+                // Restore transition after a small delay
+                setTimeout(() => {
+                    content.style.transition = 'max-height 0.4s ease-in-out';
+                }, 10);
+            });
+        });
+
+        // Initial setup for the first module to be open
+        window.onload = function() {
+            const firstItem = document.querySelector('.accordion-item.active');
+            if (firstItem) {
+                const content = firstItem.querySelector('.accordion-content');
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        };
     </script>
 </body>
 </html>
