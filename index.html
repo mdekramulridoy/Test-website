@@ -16,93 +16,107 @@
         #messageBox {
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
+            transform: translateY(100%);
+            z-index: 100;
         }
         .message-show {
             opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+        /* ভিডিও কন্টেইনারের জন্য রেশিও */
+        .aspect-video {
+            aspect-ratio: 16 / 9;
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- প্রধান কন্টেইনার -->
-    <div class="w-full max-w-2xl bg-white shadow-2xl rounded-xl p-8 md:p-10 border border-gray-100">
+    <!-- প্রধান কন্টেইনার (বড় স্ক্রিনের জন্য চওড়া করা হলো) -->
+    <div class="w-full max-w-5xl bg-white shadow-2xl rounded-xl p-8 md:p-12 border border-gray-100">
 
         <!-- শিরোনাম এবং সূচনা -->
-        <div class="text-center mb-8">
-            <svg class="w-16 h-16 mx-auto text-sky-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-            <h1 class="text-3xl font-extrabold text-gray-800 mb-2">আপনার ইমেল যাচাই করুন</h1>
-            <p class="text-gray-500">আপনার কোর্সটি শুরু করার আগে, আপনাকে অবশ্যই আপনার ইমেল ঠিকানাটি নিশ্চিত করতে হবে।</p>
+        <div class="text-center mb-10">
+            <svg class="w-16 h-16 mx-auto text-indigo-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">প্রয়োজনীয় ইমেল যাচাইকরণ</h1>
+            <p class="text-gray-500 max-w-md mx-auto">নিরাপদ এবং নিরবচ্ছিন্ন পরিষেবা নিশ্চিত করতে, আপনার নিবন্ধিত ইমেল ঠিকানাটি যাচাই করুন।</p>
         </div>
 
-        <!-- মূল নির্দেশনা ব্লক -->
-        <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800 p-4 rounded-lg mb-8" role="alert">
-            <p class="font-semibold mb-1">গুরুত্বপূর্ণ বার্তা:</p>
-            <p class="text-sm">আমরা আপনার দেওয়া ঠিকানায় একটি যাচাইকরণ লিঙ্ক সহ একটি ইমেল পাঠিয়েছি। এটি আপনার অ্যাকাউন্ট সুরক্ষিত করতে এবং কোর্স অ্যাক্সেস দিতে সাহায্য করবে।</p>
+        <!-- মূল নির্দেশনা ব্লক (হাইলাইট) -->
+        <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800 p-4 rounded-lg mb-10" role="alert">
+            <p class="font-bold mb-1 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                সতর্কতা: আপনার যাচাইকরণ লিঙ্কটি পাঠানো হয়েছে!
+            </p>
+            <p class="text-sm">অনুগ্রহ করে আপনার ইনবক্স চেক করুন এবং প্রদত্ত লিঙ্কে ক্লিক করে প্রক্রিয়াটি সম্পূর্ণ করুন।</p>
         </div>
 
-        <!-- ভিডিও টিউটোরিয়াল সেকশন -->
-        <div class="mb-8">
-            <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">১. ভিডিও টিউটোরিয়াল (যারা সহজে বুঝতে চান)</h2>
-            <div class="relative pt-[56.25%] bg-gray-300 rounded-lg overflow-hidden shadow-md">
-                <!-- এই অংশে আপনার আসল ইউটিউব ভিডিও/টিউটোরিয়াল এমবেড কোড বসান -->
-                <div class="absolute inset-0 flex items-center justify-center text-center p-4 bg-gray-800 text-white">
-                    <p class="text-lg font-medium">এখানে ইমেল যাচাইকরণের পদ্ধতির উপর আপনার ভিডিও টিউটোরিয়ালটি থাকবে।</p>
-                    <p class="absolute bottom-2 text-sm text-gray-400">Placeholder Video Embed</p>
+        <!-- দুই-কলাম লেআউট: ভিডিও (বাম) এবং ধাপ (ডান) -->
+        <div class="md:grid md:grid-cols-2 md:gap-12">
+            
+            <!-- বাম কলাম: ভিডিও টিউটোরিয়াল সেকশন -->
+            <div class="mb-8 md:mb-0">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">১. ভিডিও নির্দেশিকা</h2>
+                <div class="aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-xl ring-4 ring-indigo-200">
+                    <!-- এই অংশে আপনার আসল ইউটিউব ভিডিও/টিউটোরিয়াল এমবেড কোড বসান -->
+                    <div class="w-full h-full flex items-center justify-center text-center p-4 bg-gray-800 text-white">
+                        <p class="text-lg font-medium">এখানে আপনার প্রফেশনাল ভিডিও টিউটোরিয়ালটি থাকবে (ইউটিউব/ভিমিও)।</p>
+                    </div>
+                    <!-- <iframe class="w-full h-full" src="আপনার-ভিডিও-লিঙ্ক" frameborder="0" allowfullscreen></iframe> -->
                 </div>
-                <!-- <iframe class="absolute inset-0 w-full h-full" src="আপনার-ভিডিও-লিঙ্ক" frameborder="0" allowfullscreen></iframe> -->
+                <p class="text-sm text-gray-500 mt-3 text-center">ভিডিওটি দেখার পরেও যদি কোনো সমস্যা হয়, তবে ডানদিকের ধাপগুলি অনুসরণ করুন।</p>
+            </div>
+
+            <!-- ডান কলাম: ধাপে ধাপে নির্দেশাবলী -->
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">২. ধাপে ধাপে যাচাইকরণ প্রক্রিয়া</h2>
+                <ol class="space-y-6 text-gray-600">
+                    <!-- ধাপ ১: ইনবক্স চেক করা -->
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg mr-3 shadow-md">১</span>
+                        <div>
+                            <p class="font-bold text-lg text-gray-800">ইনবক্স চেক করুন</p>
+                            <p class="text-base">আপনি নিবন্ধন করার জন্য যে ইমেল ঠিকানাটি ব্যবহার করেছেন, সেটির ইনবক্সটি সাবধানে পরীক্ষা করুন।</p>
+                        </div>
+                    </li>
+                    <!-- ধাপ ২: স্প্যাম ফোল্ডার খোঁজা -->
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg mr-3 shadow-md">২</span>
+                        <div>
+                            <p class="font-bold text-lg text-gray-800">স্প্যাম/জাঙ্ক ফোল্ডার চেক করুন</p>
+                            <p class="text-base">যদি ইনবক্সে ইমেলটি না পান, তবে নিশ্চিতভাবে আপনার <span class="font-bold text-red-500">স্প্যাম (Spam) বা জাঙ্ক (Junk)</span> ফোল্ডারটি চেক করুন। ইমেলের শিরোনাম: <span class="font-mono bg-gray-100 px-1 rounded-sm">"আপনার অ্যাকাউন্ট নিশ্চিত করুন"</span>।</p>
+                        </div>
+                    </li>
+                    <!-- ধাপ ৩: লিঙ্কে ক্লিক করা -->
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg mr-3 shadow-md">৩</span>
+                        <div>
+                            <p class="font-bold text-lg text-gray-800">যাচাইকরণ লিঙ্কে ক্লিক করুন</p>
+                            <p class="text-base">ইমেলের ভিতরে থাকা সবুজ রঙের <span class="text-green-600 font-bold">"ইমেল যাচাই করুন"</span> বোতাম বা লিঙ্কে ক্লিক করুন। এটি আপনাকে কোর্সের ড্যাশবোর্ডে নিয়ে যাবে।</p>
+                        </div>
+                    </li>
+                    <!-- ধাপ ৪: সফল সমাপ্তি -->
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg mr-3 shadow-md">৪</span>
+                        <div>
+                            <p class="font-bold text-lg text-gray-800">অভিনন্দন! কাজ শেষ</p>
+                            <p class="text-base">সফলভাবে যাচাইকরণের পরে, আপনি এখন আমাদের কোর্সের সকল রিসোর্স এবং ড্যাশবোর্ড অ্যাক্সেস করতে প্রস্তুত।</p>
+                        </div>
+                    </li>
+                </ol>
             </div>
         </div>
 
-        <!-- ধাপে ধাপে নির্দেশাবলী -->
-        <div class="mb-8">
-            <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">২. ধাপে ধাপে নির্দেশাবলী</h2>
-            <ol class="space-y-4 text-gray-600">
-                <!-- ধাপ ১: ইনবক্স চেক করা -->
-                <li class="flex items-start">
-                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">১</span>
-                    <div>
-                        <p class="font-semibold text-gray-800">আপনার ইমেল ইনবক্স চেক করুন</p>
-                        <p class="text-sm">আপনি যে ইমেল ঠিকানাটি দিয়ে নিবন্ধন করেছেন, সেটির ইনবক্সে যান।</p>
-                    </div>
-                </li>
-                <!-- ধাপ ২: ইমেল খোঁজা -->
-                <li class="flex items-start">
-                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">২</span>
-                    <div>
-                        <p class="font-semibold text-gray-800">আমাদের ইমেলটি খুঁজুন</p>
-                        <p class="text-sm">শিরোনাম দেখুন: <span class="font-mono bg-gray-100 px-1 rounded-sm">"আপনার অ্যাকাউন্ট নিশ্চিত করুন"</span>। যদি ইনবক্সে না পান, অনুগ্রহ করে আপনার <span class="font-bold">স্প্যাম (Spam) বা জাঙ্ক (Junk)</span> ফোল্ডার চেক করুন।</p>
-                    </div>
-                </li>
-                <!-- ধাপ ৩: লিঙ্কে ক্লিক করা -->
-                <li class="flex items-start">
-                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">৩</span>
-                    <div>
-                        <p class="font-semibold text-gray-800">যাচাইকরণ লিঙ্কে ক্লিক করুন</p>
-                        <p class="text-sm">ইমেলের ভেতরে থাকা <span class="text-green-600 font-bold">"ইমেল যাচাই করুন"</span> বোতাম বা লিঙ্কে ক্লিক করুন।</p>
-                    </div>
-                </li>
-                <!-- ধাপ ৪: সফল সমাপ্তি -->
-                <li class="flex items-start">
-                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">৪</span>
-                    <div>
-                        <p class="font-semibold text-gray-800">সফলভাবে যাচাই করুন</p>
-                        <p class="text-sm">ক্লিক করার পরে, আপনার অ্যাকাউন্ট যাচাই হয়ে যাবে এবং আপনি স্বয়ংক্রিয়ভাবে আপনার কোর্সের ড্যাশবোর্ডে প্রবেশাধিকার পাবেন।</p>
-                    </div>
-                </li>
-            </ol>
-        </div>
-
-        <!-- অ্যাকশন এবং সহায়তা -->
-        <div class="text-center pt-6 border-t">
-            <p class="text-gray-600 mb-4">যদি আপনি ইমেলটি না পেয়ে থাকেন বা লিঙ্কটি কাজ না করে,</p>
-            <button id="resendButton" onclick="resendEmail()" class="w-full md:w-auto px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50">
-                ইমেল আবার পাঠান
+        <!-- অ্যাকশন এবং সহায়তা (ফুল-উইডথ ফুটার) -->
+        <div class="text-center pt-8 mt-10 border-t border-gray-200">
+            <p class="text-gray-600 mb-4 font-medium">যদি যাচাইকরণ ইমেলটি না এসে থাকে (৫০ মিনিটের মধ্যে), অথবা লিঙ্কে ক্লিক করার পরেও কোনো সমস্যা হয়,</p>
+            <button id="resendButton" onclick="resendEmail()" class="w-full md:w-2/3 lg:w-1/2 px-8 py-3 bg-teal-600 text-white font-semibold text-lg rounded-lg hover:bg-teal-700 transition duration-300 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-teal-500 focus:ring-opacity-50">
+                যাচাইকরণ ইমেল পুনরায় পাঠান
             </button>
         </div>
     </div>
 
     <!-- কাস্টম বার্তা বক্স (Alert এর পরিবর্তে) -->
-    <div id="messageBox" class="fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl pointer-events-none transform translate-y-full">
+    <div id="messageBox" class="fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl pointer-events-none transition duration-300">
         <p id="messageText" class="font-medium"></p>
     </div>
 
@@ -121,11 +135,11 @@
 
             // একটি বাস্তবসম্মত বিলম্বের জন্য সেটটাইমআউট ব্যবহার
             setTimeout(() => {
-                const messageText = "যাচাইকরণ ইমেলটি আপনার ঠিকানায় আবার পাঠানো হয়েছে। অনুগ্রহ করে চেক করুন!";
+                const messageText = "যাচাইকরণ ইমেলটি আপনার ঠিকানায় আবার পাঠানো হয়েছে। অনুগ্রহ করে স্প্যাম ফোল্ডার সহ চেক করুন!";
                 showMessage(messageText, 'bg-green-600');
                 
                 button.disabled = false;
-                button.textContent = 'ইমেল আবার পাঠান';
+                button.textContent = 'যাচাইকরণ ইমেল পুনরায় পাঠান';
                 button.classList.remove('opacity-70');
 
             }, 2000); // 2 সেকেন্ডের বিলম্ব
@@ -141,19 +155,17 @@
             const messageText = document.getElementById('messageText');
 
             // পুরানো ক্লাসগুলি সরান এবং নতুন সেট করুন
-            messageBox.classList.remove('bg-green-600', 'bg-red-600'); 
+            messageBox.classList.remove('bg-green-600', 'bg-red-600', 'bg-yellow-600'); 
             messageBox.classList.add(bgColorClass);
 
             messageText.textContent = message;
             
             // দৃশ্যমান করুন
             messageBox.classList.add('message-show');
-            messageBox.style.transform = 'translateY(0)';
 
             // 5 সেকেন্ড পর লুকান
             setTimeout(() => {
                 messageBox.classList.remove('message-show');
-                messageBox.style.transform = 'translateY(100%)';
             }, 5000);
         }
 
