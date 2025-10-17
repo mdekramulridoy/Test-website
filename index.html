@@ -3,590 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ইউটিউব মাস্টারী কোর্স রুটিন (ব্যাচ ০২)</title>
+    <title>ইমেল যাচাইকরণ নির্দেশিকা - আপনার কোর্স</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Serif+Bengali:wght@100..900&display=swap');
+        /* ফন্ট নিশ্চিত করতে এবং ব্যাকগ্রাউন্ড সেট করতে */
         body {
-            font-family: 'Noto Serif Bengali', 'Inter', sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb; /* হালকা ধূসর ব্যাকগ্রাউন্ড */
         }
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-in-out;
+        /* কাস্টম বার্তা বক্সের জন্য CSS */
+        #messageBox {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
         }
-        .active .accordion-content {
-            max-height: 2000px; /* Sufficiently large value */
-        }
-        .task-list {
-            list-style: none;
-            padding-left: 0;
-        }
-        .task-list li::before {
-            content: "✅";
-            margin-right: 8px;
-            color: #10b981; /* Tailwind emerald-500 */
-        }
-        /* Custom scrollbar for module tables */
-        .module-table-container {
-            overflow-x: auto;
-            max-width: 100%;
+        .message-show {
+            opacity: 1 !important;
         }
     </style>
 </head>
-<body class="p-4 sm:p-8">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- Header & Title Banner -->
-    <header class="bg-gray-800 text-white rounded-xl shadow-2xl p-6 mb-10 text-center">
-        <h1 class="text-3xl sm:text-4xl font-extrabold mb-1 tracking-wider">
-            ইউটিউব মাস্টারী কোর্স রুটিন
-        </h1>
-        <p class="text-xl sm:text-2xl font-light text-teal-300">
-            ব্যাচ ০২: লক্ষ্য পূরণের বিস্তারিত দৈনিক গাইডলাইন
-        </p>
-    </header>
+    <!-- প্রধান কন্টেইনার -->
+    <div class="w-full max-w-2xl bg-white shadow-2xl rounded-xl p-8 md:p-10 border border-gray-100">
 
-    <!-- Key Rules & Timeline -->
-    <section class="mb-10 bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
-        <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">📅 কোর্সের সময়সূচি ও মূল নিয়মাবলী</h2>
-        
-        <div class="space-y-3 text-lg">
-            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span class="font-medium text-gray-600 w-full sm:w-1/3">কোর্সের সময়কাল:</span>
-                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">১৫ নভেম্বর – ১৫ জানুয়ারি (০২ মাস)</span>
-            </div>
-            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span class="font-medium text-gray-600 w-full sm:w-1/3">মোট কাজের দিন:</span>
-                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রায় ৪৪ দিন</span>
-            </div>
-            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span class="font-medium text-gray-600 w-full sm:w-1/3">ভিডিও আপলোড সময়:</span>
-                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রতিদিন সন্ধ্যা ৭:৩০ (শুক্রবার ও বড় ছুটি বাদে)</span>
-            </div>
-            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span class="font-medium text-gray-600 w-full sm:w-1/3">সাপ্তাহিক ছুটি:</span>
-                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রতি শুক্রবার (সম্পূর্ণ অফ)</span>
-            </div>
-            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span class="font-medium text-gray-600 w-full sm:w-1/3">দৈনিক হেল্পলাইন (Meet):</span>
-                <span class="font-bold text-teal-600 w-full sm:w-2/3 sm:text-right">প্রতিদিন সন্ধ্যা ৪:০০ টা থেকে ৬:০০ টা পর্যন্ত (শুক্রবার ও বড় ছুটি বাদে)</span>
-            </div>
-            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center p-3 bg-red-50 rounded-lg">
-                <span class="font-medium text-red-700 w-full sm:w-1/3">সার্টিফিকেট ও বিশেষ কেয়ার:</span>
-                <span class="font-bold text-red-700 w-full sm:w-2/3 sm:text-right">১৭ জানুয়ারি (৮০% বা তার বেশি মার্কস প্রাপ্তদের জন্য)</span>
-            </div>
+        <!-- শিরোনাম এবং সূচনা -->
+        <div class="text-center mb-8">
+            <svg class="w-16 h-16 mx-auto text-sky-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <h1 class="text-3xl font-extrabold text-gray-800 mb-2">আপনার ইমেল যাচাই করুন</h1>
+            <p class="text-gray-500">আপনার কোর্সটি শুরু করার আগে, আপনাকে অবশ্যই আপনার ইমেল ঠিকানাটি নিশ্চিত করতে হবে।</p>
         </div>
-    </section>
 
-    <!-- Course Modules (Accordion) -->
-    <h2 class="text-3xl font-extrabold mb-6 text-gray-800 text-center">🎓 কোর্স মডিউল ও দৈনিক রুটিন</h2>
+        <!-- মূল নির্দেশনা ব্লক -->
+        <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800 p-4 rounded-lg mb-8" role="alert">
+            <p class="font-semibold mb-1">গুরুত্বপূর্ণ বার্তা:</p>
+            <p class="text-sm">আমরা আপনার দেওয়া ঠিকানায় একটি যাচাইকরণ লিঙ্ক সহ একটি ইমেল পাঠিয়েছি। এটি আপনার অ্যাকাউন্ট সুরক্ষিত করতে এবং কোর্স অ্যাক্সেস দিতে সাহায্য করবে।</p>
+        </div>
 
-    <div id="module-accordion" class="space-y-4">
-        
-        <!-- Module 1 -->
-        <div class="accordion-item bg-white rounded-xl shadow-xl overflow-hidden active">
-            <button class="accordion-header flex justify-between items-center w-full p-5 bg-teal-600 text-white text-left font-bold text-xl rounded-t-xl transition duration-300 hover:bg-teal-700 focus:outline-none" onclick="toggleAccordion(this)">
-                <span>মডিউল ১: ভিত্তি স্থাপন ও AI প্রস্তুতি (নভেম্বর ১৫ - ২৯)</span>
-                <span class="text-sm font-normal">(মোট কাজের দিন: ১০ দিন)</span>
-                <svg class="w-6 h-6 transform transition-transform duration-300 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-            <div class="accordion-content p-0">
-                <div class="module-table-container">
-                    <table class="min-w-[700px] divide-y divide-gray-200">
-                        <thead>
-                            <tr class="bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <th class="px-6 py-3">তারিখ</th>
-                                <th class="px-6 py-3">দিন</th>
-                                <th class="px-6 py-3">ভিডিও টপিক (সন্ধ্যা ৭:৩০)</th>
-                                <th class="px-6 py-3">টাস্ক ও অ্যাসাইনমেন্ট</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 text-sm">
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১৪ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (কোর্স শুরুর দিন)</td>
-                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">১৫ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ফাউন্ডেশন]</span> ইউটিউব অ্যালগরিদমের রহস্য ও Niche নির্বাচন।</td>
-                                <td class="px-6 py-3">Niche/চ্যানেল টপিক চূড়ান্ত করা।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">১৬ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ফাউন্ডেশন]</span> প্রফেশনাল চ্যানেল সেটআপ (নাম, ডিসক্রিপশন, ট্যাগস)।</td>
-                                <td class="px-6 py-3">চ্যানেল তৈরি এবং অপ্টিমাইজেশন।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">১৭ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[AI প্রস্তুতি]</span> AI কন্টেন্ট ইকোসিস্টেম ও Gemini, ChatGPT-এর পরিচিতি।</td>
-                                <td class="px-6 py-3">AI প্ল্যাটফর্মগুলিতে অ্যাকাউন্ট তৈরি করা।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">১৮ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ব্র্যান্ডিং]</span> কাস্টম Logo, Banner ও Channel Art তৈরি।</td>
-                                <td class="px-6 py-3">লোগো ও ব্যানার ডিজাইন শেষ করা।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">১৯ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[প্রিমিয়াম টুলস]</span> Canva Pro ফ্রি অ্যাক্সেস সেটআপ ও ব্যবহারের কৌশল।</td>
-                                <td class="px-6 py-3">Canva-এর বেসিক ডিজাইন টুলস অনুশীলন।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">২০ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কন্টেন্ট সোর্স]</span> কপিরাইট ফ্রি ফুটেজ ও মিউজিক সংগ্রহের সেরা উপায়।</td>
-                                <td class="px-6 py-3">কন্টেন্ট সংগ্রহের জন্য ৩টি ওয়েবসাইট চিহ্নিত করা।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">২১ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">২২ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[শর্টস মাস্টারী]</span> Shorts vs Long-form কন্টেন্ট এবং ভাইরাল Shorts-এর কাঠামো।</td>
-                                <td class="px-6 py-3">শর্টস অ্যাসাইনমেন্টের জন্য প্রস্তুতি শুরু।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">২৩ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[মোবাইল এডিটিং]</span> মোবাইল দিয়ে হাই-এনগেজমেন্ট শর্টস ভিডিও এডিটিং (Step-by-Step)।</td>
-                                <td class="px-6 py-3">প্রথম টাস্ক: প্রথম শর্টস ভিডিও তৈরি শুরু।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">২৪ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ভাইরাল টাস্ক শুরু]</span> শর্টস ভিডিও অ্যাসাইনমেন্টের নিয়ম ও মার্কিং (৮০% পাস)।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: ১টি শর্টস ভিডিও তৈরি করে Facebook Inbox-এ সাবমিট।</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- ভিডিও টিউটোরিয়াল সেকশন -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">১. ভিডিও টিউটোরিয়াল (যারা সহজে বুঝতে চান)</h2>
+            <div class="relative pt-[56.25%] bg-gray-300 rounded-lg overflow-hidden shadow-md">
+                <!-- এই অংশে আপনার আসল ইউটিউব ভিডিও/টিউটোরিয়াল এমবেড কোড বসান -->
+                <div class="absolute inset-0 flex items-center justify-center text-center p-4 bg-gray-800 text-white">
+                    <p class="text-lg font-medium">এখানে ইমেল যাচাইকরণের পদ্ধতির উপর আপনার ভিডিও টিউটোরিয়ালটি থাকবে।</p>
+                    <p class="absolute bottom-2 text-sm text-gray-400">Placeholder Video Embed</p>
                 </div>
+                <!-- <iframe class="absolute inset-0 w-full h-full" src="আপনার-ভিডিও-লিঙ্ক" frameborder="0" allowfullscreen></iframe> -->
             </div>
         </div>
 
-        <!-- Module 2 -->
-        <div class="accordion-item bg-white rounded-xl shadow-xl overflow-hidden">
-            <button class="accordion-header flex justify-between items-center w-full p-5 bg-teal-600 text-white text-left font-bold text-xl transition duration-300 hover:bg-teal-700 focus:outline-none" onclick="toggleAccordion(this)">
-                <span>মডিউল ২: অ্যাডভান্সড AI, এডিটিং ও নিরাপত্তা (নভেম্বর ২৫ - ডিসেম্বর ২৮)</span>
-                <span class="text-sm font-normal">(মোট কাজের দিন: ২১ দিন + ছুটি)</span>
-                <svg class="w-6 h-6 transform transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-            <div class="accordion-content p-0">
-                <div class="module-table-container">
-                    <table class="min-w-[700px] divide-y divide-gray-200">
-                        <thead>
-                            <tr class="bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <th class="px-6 py-3">তারিখ</th>
-                                <th class="px-6 py-3">দিন</th>
-                                <th class="px-6 py-3">ভিডিও টপিক (সন্ধ্যা ৭:৩০)</th>
-                                <th class="px-6 py-3">টাস্ক ও অ্যাসাইনমেন্ট</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 text-sm">
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">২৫ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[AI স্ক্রিপ্ট]</span> Gemini ব্যবহার করে ভাইরাল স্ক্রিপ্ট ও টাইটেল জেনারেশন।</td>
-                                <td class="px-6 py-3">টাস্ক: AI ব্যবহার করে পরবর্তী শর্টস স্ক্রিপ্ট তৈরি।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">২৬ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[মনিটাইজেশন নিরাপত্তা]</span> অন্যের ভিডিও ব্যবহার ও কপিরাইট এড়ানোর কৌশল।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">২৭ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অডিও এডিটিং]</span> Audacity দিয়ে ভয়েস এডিটিং ও প্রো সাউন্ড কোয়ালিটি নিশ্চিত করা।</td>
-                                <td class="px-6 py-3">টাস্ক: ভয়েস রেকর্ডিং ও এডিটিং অনুশীলন।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">২৮ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">২৯ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[থাম্বনেইল জাদু]</span> Eye-Catching Thumbnail তৈরি করার নিয়ম ও CTR বৃদ্ধি।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">৩০ নভেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ভিডিও এডিটিং]</span> Adobe Premiere Pro: বেসিক ইন্টারফেস ও কাট-টু-কাট এডিটিং।</td>
-                                <td class="px-6 py-3">টাস্ক: Premiere Pro ইন্টারফেস পরিচিতি।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">০১ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[এঙ্গেজমেন্ট]</span> Audience Retention বাড়ানোর গোপন কৌশল ও ৫টি প্রো টিপস।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">০২ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[লং-ফর্ম প্রস্তুতি]</span> Long-form ভিডিও তৈরির কাঠামো ও প্ল্যানিং।</td>
-                                <td class="px-6 py-3">লং-ফর্ম ভিডিওর টপিক চূড়ান্ত করা।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">০৩ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">০৪ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">০৫ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">০৬ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[AI মাল্টিমিডিয়া]</span> AI দিয়ে ইমেজ, ভয়েসওভার ও মিউজিক তৈরি।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">০৭ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অ্যাডভান্সড এডিটিং]</span> Premiere Pro: স্মুথ ট্রানজিশন ও কালার কারেকশন।</td>
-                                <td class="px-6 py-3">টাস্ক: লং ভিডিওর এডিটিং শুরু।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">০৮ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[SEO রুলস]</span> SEO-ফ্রেন্ডলি ভিডিও টাইটেল, ট্যাগ ও ডিসক্রিপশন তৈরি।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">০৯ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১০ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১১ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১২ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">১৩ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কন্টেন্ট রিপারপোসিং]</span> ১টি ভিডিও থেকে ৫টি ইনকাম সোর্স বের করা।</td>
-                                <td class="px-6 py-3">লং ভিডিও টাস্কের ডেডলাইন ঘোষণা।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">১৪ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কাস্টম গাইড]</span> আপনার Niche অনুযায়ী ভিডিও সোর্স খুঁজে বের করা।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১৫ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১৬ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১৭ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১৮ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১৯ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">২০ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[গ্রোথ টুলস]</span> VidIQ এবং SEO Checker Tools-এর ব্যবহার।</td>
-                                <td class="px-6 py-3">টাস্ক: VidIQ সেটআপ ও ব্যবহার।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">২১ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[লং ভিডিও সাবমিশন]</span> অর্ধ-কোর্স মূল্যায়ন: লং ভিডিও সাবমিশন ও রিভিউ।</td>
-                                <td class="px-6 py-3 font-bold text-red-600">টাস্ক: লং ভিডিও সাবমিট (প্রথম লং টাস্ক)।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">২২ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">২৩ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">২৪ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">২৫ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3 font-semibold">বড়দিনের ছুটি (ঐচ্ছিক)</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[YPP গাইড]</span> YouTube Partner Program (YPP) এপ্লাই করার নিয়ম।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">২৬ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">কোনো কাজ নেই।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">২৭ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অ্যাডসেন্স]</span> AdSense Setup ও PIN Verification প্রক্রিয়া।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">২৮ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[পেমেন্ট]</span> YouTube-এর টাকা ব্যাংক বা মোবাইল ব্যাংকিংয়ে নেওয়ার সহজ উপায়।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <!-- ধাপে ধাপে নির্দেশাবলী -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">২. ধাপে ধাপে নির্দেশাবলী</h2>
+            <ol class="space-y-4 text-gray-600">
+                <!-- ধাপ ১: ইনবক্স চেক করা -->
+                <li class="flex items-start">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">১</span>
+                    <div>
+                        <p class="font-semibold text-gray-800">আপনার ইমেল ইনবক্স চেক করুন</p>
+                        <p class="text-sm">আপনি যে ইমেল ঠিকানাটি দিয়ে নিবন্ধন করেছেন, সেটির ইনবক্সে যান।</p>
+                    </div>
+                </li>
+                <!-- ধাপ ২: ইমেল খোঁজা -->
+                <li class="flex items-start">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">২</span>
+                    <div>
+                        <p class="font-semibold text-gray-800">আমাদের ইমেলটি খুঁজুন</p>
+                        <p class="text-sm">শিরোনাম দেখুন: <span class="font-mono bg-gray-100 px-1 rounded-sm">"আপনার অ্যাকাউন্ট নিশ্চিত করুন"</span>। যদি ইনবক্সে না পান, অনুগ্রহ করে আপনার <span class="font-bold">স্প্যাম (Spam) বা জাঙ্ক (Junk)</span> ফোল্ডার চেক করুন।</p>
+                    </div>
+                </li>
+                <!-- ধাপ ৩: লিঙ্কে ক্লিক করা -->
+                <li class="flex items-start">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">৩</span>
+                    <div>
+                        <p class="font-semibold text-gray-800">যাচাইকরণ লিঙ্কে ক্লিক করুন</p>
+                        <p class="text-sm">ইমেলের ভেতরে থাকা <span class="text-green-600 font-bold">"ইমেল যাচাই করুন"</span> বোতাম বা লিঙ্কে ক্লিক করুন।</p>
+                    </div>
+                </li>
+                <!-- ধাপ ৪: সফল সমাপ্তি -->
+                <li class="flex items-start">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold mr-3">৪</span>
+                    <div>
+                        <p class="font-semibold text-gray-800">সফলভাবে যাচাই করুন</p>
+                        <p class="text-sm">ক্লিক করার পরে, আপনার অ্যাকাউন্ট যাচাই হয়ে যাবে এবং আপনি স্বয়ংক্রিয়ভাবে আপনার কোর্সের ড্যাশবোর্ডে প্রবেশাধিকার পাবেন।</p>
+                    </div>
+                </li>
+            </ol>
         </div>
 
-        <!-- Module 3 -->
-        <div class="accordion-item bg-white rounded-xl shadow-xl overflow-hidden">
-            <button class="accordion-header flex justify-between items-center w-full p-5 bg-teal-600 text-white text-left font-bold text-xl transition duration-300 hover:bg-teal-700 focus:outline-none" onclick="toggleAccordion(this)">
-                <span>মডিউল ৩: মনিটাইজেশন ও চূড়ান্ত গ্রোথ (ডিসেম্বর ২৯ - জানুয়ারি ১৫)</span>
-                <span class="text-sm font-normal">(মোট কাজের দিন: ১৩ দিন + ছুটি)</span>
-                <svg class="w-6 h-6 transform transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        <!-- অ্যাকশন এবং সহায়তা -->
+        <div class="text-center pt-6 border-t">
+            <p class="text-gray-600 mb-4">যদি আপনি ইমেলটি না পেয়ে থাকেন বা লিঙ্কটি কাজ না করে,</p>
+            <button id="resendButton" onclick="resendEmail()" class="w-full md:w-auto px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50">
+                ইমেল আবার পাঠান
             </button>
-            <div class="accordion-content p-0">
-                <div class="module-table-container">
-                    <table class="min-w-[700px] divide-y divide-gray-200">
-                        <thead>
-                            <tr class="bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <th class="px-6 py-3">তারিখ</th>
-                                <th class="px-6 py-3">দিন</th>
-                                <th class="px-6 py-3">ভিডিও টপিক (সন্ধ্যা ৭:৩০)</th>
-                                <th class="px-6 py-3">টাস্ক ও অ্যাসাইনমেন্ট</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 text-sm">
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">২৯ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[কপিরাইট নিরাপত্তা]</span> Copyright Claim ও Strike এড়ানোর কৌশল এবং সমাধান।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">৩০ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[শেষ প্রস্তুতি]</span> কোন ভিডিও Monetization পাবে, কোনগুলো পাবে না?।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">৩১ ডিসেম্বর</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[চূড়ান্ত পর্যালোচনা]</span> ভুল Niche Selection ও ব্যর্থতার কারণগুলো এড়ানো।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">০১ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3 font-semibold">নববর্ষের ছুটি (ঐচ্ছিক)</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[ফাইনাল ক্লাস]</span> কোর্স রিভিউ, প্রশ্ন-উত্তর ও পরবর্তী পদক্ষেপ।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">০২ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">০৩ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[চূড়ান্ত টাস্ক]</span> সকল বকেয়া টাস্ক ও রি-এক্সাম সাবমিশনের শেষ দিন।</td>
-                                <td class="px-6 py-3 font-bold text-red-600">চূড়ান্ত টাস্ক সাবমিশন।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">০৪ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অতিরিক্ত ক্লাস]</span> বিশেষ ক্যাটাগরি অনুসারে কন্টেন্ট গ্রোথ স্ট্র্যাটেজি।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">০৯ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শুক্রবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (সাপ্তাহিক)</td>
-                                <td class="px-6 py-3">ফেল করা শিক্ষার্থীদের রি-এক্সামের সুযোগ।</td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">১০ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">শনিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অতিরিক্ত ক্লাস]</span> সফল কন্টেন্ট ক্রিয়েটরদের কেস স্টাডি ও শেখার বিষয়।</td>
-                                <td class="px-6 py-3 font-semibold text-red-600">টাস্ক: লং ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">১১ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">রবিবার</td>
-                                <td class="px-6 py-3"><span class="font-medium text-teal-600">[অতিরিক্ত ক্লাস]</span> ফেসবুক ও ইউটিউব Short Algorithm-এর সাম্প্রতিক আপডেট।</td>
-                                <td class="px-6 py-3 font-semibold text-green-700">টাস্ক: শর্টস ভিডিও তৈরি (সাবমিট)।</td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১২ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">সোমবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-red-50 text-red-700">
-                                <td class="px-6 py-3 whitespace-nowrap">১৩ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">মঙ্গলবার</td>
-                                <td class="px-6 py-3 font-semibold">ছুটি (ঐচ্ছিক/ফাঁকা)</td>
-                                <td class="px-6 py-3"></td>
-                            </tr>
-                            <tr class="bg-teal-50">
-                                <td class="px-6 py-3 whitespace-nowrap">১৪ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বুধবার</td>
-                                <td class="px-6 py-3 font-bold text-lg text-gray-800">কোর্স সমাপ্তি</td>
-                                <td class="px-6 py-3">চূড়ান্ত মার্কস গণনা ও ফলাফল তৈরি।</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-3 whitespace-nowrap">১৫ জানুয়ারি</td>
-                                <td class="px-6 py-3 whitespace-nowrap">বৃহস্পতিবার</td>
-                                <td class="px-6 py-3 font-bold text-lg text-gray-800">চূড়ান্ত ফলাফল ঘোষণা</td>
-                                <td class="px-6 py-3">ফাইনাল মার্কস ও সার্টিফিকেট প্রাপকের তালিকা।</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Final Evaluation Section -->
-    <section class="mt-12 bg-teal-100 p-6 rounded-xl shadow-lg border-l-8 border-teal-600">
-        <h2 class="text-2xl font-bold mb-4 text-teal-800 flex items-center">
-            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.002 12.002 0 0012 21.025c3.555-.608 6.755-2.614 9.176-5.419a12.002 12.002 0 00-4.558-13.684z"></path></svg>
-            ✅ চূড়ান্ত মূল্যায়ন ও সার্টিফিকেট বিতরণ
-        </h2>
-        <div class="space-y-3 text-gray-700">
-            <p class="text-lg"><strong>১৬ জানুয়ারি:</strong> চূড়ান্ত ফলাফল প্রস্তুত করা হবে।</p>
-            <p class="text-lg font-bold text-teal-700">১৭ জানুয়ারি (শনিবার): সার্টিফিকেট বিতরণ ও বিশেষ গ্রুপিং শুরু হবে।</p>
-            <ul class="task-list pl-0">
-                <li class="p-2 bg-teal-200 rounded-md">সার্টিফিকেট বিতরণ: কোর্সের অ্যাসাইনমেন্টে গড়ে <strong class="text-xl">৮০% বা তার বেশি মার্কস</strong> অর্জনকারীদের জন্য।</li>
-                <li class="p-2 bg-teal-200 rounded-md">বিশেষ গ্রুপিং: উত্তীর্ণ শিক্ষার্থীদের জন্য একটি স্পেশাল গ্রুপ তৈরি করা হবে।</li>
-                <li class="p-2 bg-teal-200 rounded-md">৭ দিনের বিশেষ কেয়ার: এই গ্রুপে আগামী ৭ দিনের জন্য (১৭ জানুয়ারি থেকে ২৩ জানুয়ারি) ভিডিও আপলোড, SEO, টার্গেটিং সহ সকল খুঁটিনাটি বিষয় হাতে ধরে ব্যক্তিগতভাবে শিখিয়ে দেওয়া হবে।</li>
-            </ul>
-        </div>
-    </section>
+    <!-- কাস্টম বার্তা বক্স (Alert এর পরিবর্তে) -->
+    <div id="messageBox" class="fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl pointer-events-none transform translate-y-full">
+        <p id="messageText" class="font-medium"></p>
+    </div>
 
-    <!-- Footer -->
-    <footer class="mt-10 text-center text-gray-500 text-sm p-4 border-t border-gray-300">
-        <p>এটি একটি YouTube Mastery Course (Batch 02) এর ডিজিটাল রুটিন।</p>
-    </footer>
-
-    <!-- JavaScript for Accordion Functionality -->
     <script>
-        function toggleAccordion(button) {
-            const item = button.parentElement;
-            const content = item.querySelector('.accordion-content');
-            const svg = button.querySelector('svg');
-            
-            // Close all other open items
-            document.querySelectorAll('.accordion-item.active').forEach(openItem => {
-                if (openItem !== item) {
-                    openItem.classList.remove('active');
-                    openItem.querySelector('.accordion-content').style.maxHeight = null;
-                    openItem.querySelector('svg').classList.remove('rotate-180');
-                }
-            });
+        // গ্লোবাল ভ্যারিয়েবল ব্যবহার করা হচ্ছে না, তাই ডামি ভ্যারিয়েবল তৈরি করার প্রয়োজন নেই।
 
-            // Toggle the current item
-            if (item.classList.contains('active')) {
-                item.classList.remove('active');
-                content.style.maxHeight = null;
-                svg.classList.remove('rotate-180');
-            } else {
-                item.classList.add('active');
-                // Set max-height to the content's scroll height to enable smooth transition
-                content.style.maxHeight = content.scrollHeight + "px";
-                svg.classList.add('rotate-180');
-            }
+        /**
+         * ইমেল পুনরায় পাঠানোর জন্য মক ফাংশন।
+         * প্রকৃত অ্যাপ্লিকেশনে, এই ফাংশনটি সার্ভারে একটি API কল করবে।
+         */
+        function resendEmail() {
+            const button = document.getElementById('resendButton');
+            button.disabled = true;
+            button.textContent = 'পাঠানো হচ্ছে...';
+            button.classList.add('opacity-70');
+
+            // একটি বাস্তবসম্মত বিলম্বের জন্য সেটটাইমআউট ব্যবহার
+            setTimeout(() => {
+                const messageText = "যাচাইকরণ ইমেলটি আপনার ঠিকানায় আবার পাঠানো হয়েছে। অনুগ্রহ করে চেক করুন!";
+                showMessage(messageText, 'bg-green-600');
+                
+                button.disabled = false;
+                button.textContent = 'ইমেল আবার পাঠান';
+                button.classList.remove('opacity-70');
+
+            }, 2000); // 2 সেকেন্ডের বিলম্ব
         }
 
-        // Adjust max-height on window resize for responsiveness
-        window.addEventListener('resize', () => {
-            document.querySelectorAll('.accordion-item.active').forEach(item => {
-                const content = item.querySelector('.accordion-content');
-                // Temporarily disable transition during resize for immediate update
-                content.style.transition = 'none';
-                content.style.maxHeight = content.scrollHeight + "px";
-                // Restore transition after a small delay
-                setTimeout(() => {
-                    content.style.transition = 'max-height 0.4s ease-in-out';
-                }, 10);
-            });
-        });
+        /**
+         * কাস্টম মেসেজ বক্স দেখানোর জন্য ফাংশন।
+         * @param {string} message - প্রদর্শন করার জন্য বার্তা।
+         * @param {string} bgColorClass - বার্তার পটভূমির জন্য Tailwind ক্লাস।
+         */
+        function showMessage(message, bgColorClass) {
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
 
-        // Initial setup for the first module to be open
-        window.onload = function() {
-            const firstItem = document.querySelector('.accordion-item.active');
-            if (firstItem) {
-                const content = firstItem.querySelector('.accordion-content');
-                content.style.maxHeight = content.scrollHeight + "px";
-            }
-        };
+            // পুরানো ক্লাসগুলি সরান এবং নতুন সেট করুন
+            messageBox.classList.remove('bg-green-600', 'bg-red-600'); 
+            messageBox.classList.add(bgColorClass);
+
+            messageText.textContent = message;
+            
+            // দৃশ্যমান করুন
+            messageBox.classList.add('message-show');
+            messageBox.style.transform = 'translateY(0)';
+
+            // 5 সেকেন্ড পর লুকান
+            setTimeout(() => {
+                messageBox.classList.remove('message-show');
+                messageBox.style.transform = 'translateY(100%)';
+            }, 5000);
+        }
+
     </script>
 </body>
 </html>
